@@ -1,20 +1,22 @@
-﻿
-using BlazorApp1.Domain;
+﻿using BlazorApp1.Domain;
 
-namespace BlazorApp1.Services;
-
-public class AccountService : IAccountService
+namespace BlazorApp1.Domain
 {
-    private readonly List<IBankAccount> _accounts;
-    public IBankAccount CreateAccount(string name, AccountType accountType, string currency, decimal initialBalance)
+    public class AccountService : IAccountService
     {
-        var account = new BankAccount(name, accountType, currency, initialBalance);
-        _accounts.Add(account);
-        return account;
-    }
+        private readonly List<IBankAccount> _accounts = new();
 
-    public List<IBankAccount> GetAccounts()
-    {
-        throw new NotImplementedException();
+        public IBankAccount CreateAccount(string name, AccountType accountType, string currency, decimal initialBalance)
+        {
+            var account = new BankAccount(name, accountType, currency, initialBalance);
+            _accounts.Add(account);
+            return account;
+        }
+
+        public List<IBankAccount> GetAccounts()
+        {
+            // ✅ Returnera kontona istället för att kasta ett fel
+            return _accounts;
+        }
     }
 }

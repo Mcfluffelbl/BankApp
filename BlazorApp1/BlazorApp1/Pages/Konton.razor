@@ -1,52 +1,97 @@
 ﻿@page "/Konton"
-@inject IAccountService AccountService;
+@using BlazorApp1.Domain
+@using BlazorApp1.Services
+@inject IAccountService AccountService
 
-<h3>Vänligen skapa ett konto</h3>
+<h3>Skapa konto</h3>
 
-<EditForm Model="_model" OnInvalidSubmit="@AccountService.CreateAccount()" />
-  <DataAnnotationsValidator />
-  <ValidationSummary />
-  <div className="mb-2"/>
-    <label>Account Name</label>
-    <InputText @bind-Value="_model.Name" />
-  </div>
-  <div className="mb-2">
-     <label>Account Type</label>
-     <InputSelect bind-Value="_model.Type">
-        <option value=""Pick type!</option>
-        <option value=""@AccountType.Deposit>Deposit Account</option>
-        <option value=""@AccountType.Savings>Savings Account</option>
-     </InputSelect>
-  </div>
-  <div> className="mb-2">
-     <label>Currency</label>
-    <InputText @bind-Value="_model.Currency">SEK</InputText>
-  </div>
-  <div className="mb-2">
-      <label>Balance</label>
-      <InputNumber @bind-Value="_model.InitialBalance"></InputNumber>
-  </div>
+<EditForm Model="_model" OnSubmit="CreateAccountAsync">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
 
-  <button type="submit">CreateAccount</button>
+    <div class="mb-2">
+        <label>Account Name</label><br />
+        <InputText @bind-Value="_model.Name" />
+    </div>
+
+    <div class="mb-2">
+        <label>Account Type</label><br />
+        <InputSelect @bind-Value="_model.AccountType">
+            @foreach (var type in Enum.GetValues<AccountType>())
+            {
+                <option value="@type">@type</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="mb-2">
+        <label>Currency</label><br />
+        <InputText @bind-Value="_model.Currency" />
+    </div>
+
+    <div class="mb-2">
+        <label>Balance</label><br />
+        <InputNumber @bind-Value="_model.InitialBalance" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create Account</button>
 </EditForm>
+
+<hr />
+
+<h4>Skapade konton:</h4>
+
+@if (_createdAccounts.Any())
+{
+    <ul>
+        @foreach (var account in _createdAccounts)
+        {
+            <li>@account.Name – @account.AccountType – @account.Currency – @account.Balance</li>
+        }
+    </ul>
+}
+else
+{
+    <p>Inga konton skapade än.</p>
+}
+
 @code {
-    private readonly CreateAccountModel _model = new CreateAccountModel();
+    private CreateAccountModel _model = new();
+    private List<IBankAccount> _createdAccounts = new();
 
+    protected override void OnInitialized()
+    {
+        // Hämta konton när sidan laddas
+        _createdAccounts = AccountService.GetAccounts();
+    }
 
+    private async Task CreateAccountAsync()
+    {
+        // Skapa konto via service
+        AccountService.CreateAccount(
+            _model.Name,
+            _model.AccountType,
+            _model.Currency,
+            _model.InitialBalance
+        );
+
+        // Uppdatera listan från service
+        _createdAccounts = AccountService.GetAccounts();
+
+        // Rensa formuläret
+        _model = new CreateAccountModel();
+
+        // Rendera om sidan
+        StateHasChanged();
+
+        await Task.CompletedTask;
+    }
 
     private class CreateAccountModel
     {
         public string? Name { get; set; }
-        public AccountType? AccountType { get; set; }
-        public string? Currency { get; set; }
-        public decimal? InitialBalance { get; set; }
-
-        public void Clear()
-        {
-            Name = string.Empty;
-            AccountType = null;
-            Currency = "SEK";
-            InitialBalance = 0;
-        }
+        public AccountType AccountType { get; set; } = AccountType.Savings;
+        public string? Currency { get; set; } = "SEK";
+        public decimal InitialBalance { get; set; }
     }
 }

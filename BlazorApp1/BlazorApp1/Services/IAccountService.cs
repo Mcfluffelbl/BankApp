@@ -1,6 +1,6 @@
 ﻿using BlazorApp1.Domain;
 
-namespace BlazorApp1.Services
+namespace BlazorApp1.Domain
 {
     public interface IAccountService
     {
