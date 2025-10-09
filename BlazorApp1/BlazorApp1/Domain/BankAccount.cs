@@ -1,4 +1,4 @@
-﻿using BlazorApp1.Interface;
+﻿using BlazorApp1.Services;
 
 namespace BlazorApp1.Domain
 {
