@@ -1,7 +1,7 @@
-﻿namespace BlazorApp1.Domain
+﻿namespace BlazorApp1.Domain;
+
+public enum AccountType
 {
-    public class AccountType
-    {
-        //enum
-    }
+    Savings,
+    Deposit
 }

@@ -1,7 +1,52 @@
 ﻿@page "/Konton"
+@inject IAccountService AccountService;
 
-<h3>Konton</h3>
+<h3>Vänligen skapa ett konto</h3>
 
+<EditForm Model="_model" OnInvalidSubmit="@AccountService.CreateAccount()" />
+  <DataAnnotationsValidator />
+  <ValidationSummary />
+  <div className="mb-2"/>
+    <label>Account Name</label>
+    <InputText @bind-Value="_model.Name" />
+  </div>
+  <div className="mb-2">
+     <label>Account Type</label>
+     <InputSelect bind-Value="_model.Type">
+        <option value=""Pick type!</option>
+        <option value=""@AccountType.Deposit>Deposit Account</option>
+        <option value=""@AccountType.Savings>Savings Account</option>
+     </InputSelect>
+  </div>
+  <div> className="mb-2">
+     <label>Currency</label>
+    <InputText @bind-Value="_model.Currency">SEK</InputText>
+  </div>
+  <div className="mb-2">
+      <label>Balance</label>
+      <InputNumber @bind-Value="_model.InitialBalance"></InputNumber>
+  </div>
+
+  <button type="submit">CreateAccount</button>
+</EditForm>
 @code {
+    private readonly CreateAccountModel _model = new CreateAccountModel();
 
+
+
+    private class CreateAccountModel
+    {
+        public string? Name { get; set; }
+        public AccountType? AccountType { get; set; }
+        public string? Currency { get; set; }
+        public decimal? InitialBalance { get; set; }
+
+        public void Clear()
+        {
+            Name = string.Empty;
+            AccountType = null;
+            Currency = "SEK";
+            InitialBalance = 0;
+        }
+    }
 }
