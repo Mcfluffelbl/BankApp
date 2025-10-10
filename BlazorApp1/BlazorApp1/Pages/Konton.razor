@@ -13,6 +13,7 @@
     <div class="mb-2">
         <label>Account Name</label><br />
         <InputText @bind-Value="_model.Name" />
+		<ValidationMessage For="@(() => _model.Name)" />
     </div>
 
     <div class="mb-2">
@@ -97,9 +98,15 @@ else
     public class CreateAccountModel
     {
         [Required(ErrorMessage = "Account name is required")]
-        public string? Name { get; set; }
+		public string? Name { get; set; } = "New Account Name";
+
+		[Required(ErrorMessage = "Account type is required")]
         public AccountType AccountType { get; set; } = AccountType.Savings;
+
+		[Required(ErrorMessage = "Currency is required")]
         public string? Currency { get; set; } = "SEK"; //lägga till fler valutor senare?
+
+		[Range(0, double.MaxValue, ErrorMessage = "Initial balance must be non-negative")]
         public decimal InitialBalance { get; set; }
     }
 }
