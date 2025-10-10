@@ -13,6 +13,11 @@ namespace BlazorApp1.Domain
             return account;
         }
 
+        public Task CreateAccountAsync(string name, AccountType accountType, string currency, decimal initialBalance)
+        {
+            throw new NotImplementedException();
+        }
+
         public List<IBankAccount> GetAccounts()
         {
             // ✅ Returnera kontona istället för att kasta ett fel

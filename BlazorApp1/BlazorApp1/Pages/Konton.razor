@@ -1,6 +1,7 @@
 ﻿@page "/Konton"
 @using BlazorApp1.Domain
 @using BlazorApp1.Services
+@using System.ComponentModel.DataAnnotations
 @inject IAccountService AccountService
 
 <h3>Create a Account</h3>
@@ -41,6 +42,11 @@
 
 <h4>Skapade konton:</h4>
 
+@if (!string.IsNullOrEmpty(_errorMessage))
+{
+    <div class="text-danger">@_errorMessage</div>
+}
+
 @if (_createdAccounts.Any())
 {
     <ul>
@@ -56,8 +62,9 @@ else
 }
 
 @code {
-    private CreateAccountModel _model = new();
-    private List<IBankAccount> _createdAccounts = new();
+    public CreateAccountModel _model = new();
+    public List<IBankAccount> _createdAccounts = new();
+    private string? _errorMessage;
 
     protected override void OnInitialized()
     {
@@ -65,33 +72,34 @@ else
         _createdAccounts = AccountService.GetAccounts();
     }
 
-    private async Task CreateAccountAsync()
+    public async Task CreateAccountAsync()
     {
-        // Skapa konto via service
-        AccountService.CreateAccount(
-            _model.Name,
-            _model.AccountType,
-            _model.Currency,
-            _model.InitialBalance
-        );
+        try
+        {
+            await AccountService.CreateAccountAsync(
+                _model.Name!,
+                _model.AccountType,
+                _model.Currency!,
+                _model.InitialBalance
+            );
 
-        // Uppdatera listan från service
-        _createdAccounts = AccountService.GetAccounts();
+            _createdAccounts = AccountService.GetAccounts();
+            _model = new CreateAccountModel(); // töm formulär
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
 
-        // Rensa formuläret
-        _model = new CreateAccountModel();
-
-        // Rendera om sidan
         StateHasChanged();
-
-        await Task.CompletedTask;
     }
 
-    private class CreateAccountModel
+    public class CreateAccountModel
     {
+        [Required(ErrorMessage = "Account name is required")]
         public string? Name { get; set; }
         public AccountType AccountType { get; set; } = AccountType.Savings;
-        public string? Currency { get; set; } = "SEK";
+        public string? Currency { get; set; } = "SEK"; //lägga till fler valutor senare?
         public decimal InitialBalance { get; set; }
     }
 }
