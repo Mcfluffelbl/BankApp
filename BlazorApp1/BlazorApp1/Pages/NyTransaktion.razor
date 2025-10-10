@@ -1,5 +1,22 @@
 ﻿@page "/NyTransaktion"
 
+<style>
+.my-custom-btn2 {
+    background-color: seagreen; 
+    color: aliceblue;
+    border: none;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+.my-custom-btn2:hover {
+    background-color: darkolivegreen; 
+    transform: scale(1.03);
+}
+.my-custom-btn2:active {
+    background-color: grey;
+    transform: scale(0.98);
+}
+</style>
+
 <h3>Transaktion</h3>
 
 <h5>New Transaktion:</h5>
@@ -14,9 +31,10 @@
 	</div>
 </EditForm>
 
-<button class="btn btn-primary">Add New Transaction</button>
+<button class="btn my-custom-btn2">Add New Transaction</button>
 
 @code {
+	//lägg till sen en funktion för att spara transaktion 
 	private Transaction transaction = new Transaction();
 
 	public class Transaction
