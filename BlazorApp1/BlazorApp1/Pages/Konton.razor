@@ -6,6 +6,23 @@
 
 <h3>Create a Account</h3>
 
+<style>
+.my-custom-btn {
+    background-color: seagreen; 
+    color: aliceblue;
+    border: none;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+.my-custom-btn:hover {
+    background-color: darkolivegreen; 
+    transform: scale(1.03);
+}
+.my-custom-btn:active {
+    background-color: grey;
+    transform: scale(0.98);
+}
+</style>
+
 <EditForm Model="_model" OnSubmit="CreateAccountAsync">
     <DataAnnotationsValidator />
     <ValidationSummary />
@@ -36,7 +53,7 @@
         <InputNumber @bind-Value="_model.InitialBalance" />
     </div>
 
-    <button type="submit" class="btn btn-primary">Create Account</button>
+    <button type="submit" class="btn my-custom-btn">Create Account</button>
 </EditForm>
 
 <hr />
