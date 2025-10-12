@@ -22,9 +22,14 @@
     background-color: grey;
     transform: scale(0.98);
 }
+.my-custom-btn:disabled {
+    background-color: lightgray;
+    color: darkgray;
+    cursor: not-allowed;
+}
 </style>
 
-<EditForm Model="_model" OnSubmit="CreateAccountAsync">
+<EditForm Model="_model" OnValidSubmit="CreateAccountAsync" OnInvalidSubmit="HandleInvalidSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
@@ -42,24 +47,22 @@
                 <option value="@type">@type</option>
             }
         </InputSelect>
+		<ValidationMessage For="@(() => _model.AccountType)" />
     </div>
 
     <div class="mb-2">
         <label>Currency</label><br />
         <InputText @bind-Value="_model.Currency" />
+		<ValidationMessage For="@(() => _model.Currency)" />
     </div>
 
     <div class="mb-2">
         <label>Balance</label><br />
         <InputNumber @bind-Value="_model.InitialBalance" />
+		<ValidationMessage For="@(() => _model.InitialBalance)" />
     </div>
 
-    <button type="submit" class="btn my-custom-btn">Create Account</button>
-    <!-- Lägg till så att knappen går ej att använda om exepctions är igång för tomt namn etc -->
-    @if (!string.IsNullOrEmpty(_errorMessage))
-    {
-        
-	}
+    <button type="submit" class="btn my-custom-btn disabled="@(!_isValid)">Create Account</button>   
 </EditForm>
 
 <hr />
@@ -89,6 +92,7 @@ else
     public CreateAccountModel _model = new();
     public List<IBankAccount> _createdAccounts = new();
     private string? _errorMessage;
+    private bool _isValid = false;
 
     protected override void OnInitialized()
     {
@@ -100,6 +104,7 @@ else
     {
         try
         {
+            _errorMessage = null;
             await AccountService.CreateAccountAsync(
                 _model.Name!,
                 _model.AccountType,
@@ -109,6 +114,7 @@ else
 
             _createdAccounts = AccountService.GetAccounts();
             _model = new CreateAccountModel(); // töm formulär
+			_isValid = false; // återställ valideringsstatus
         }
         catch (Exception ex)
         {
@@ -118,10 +124,22 @@ else
         StateHasChanged();
     }
 
+    private void HandleInvalidSubmit()
+    {
+		_errorMessage = "Please correct the errors and try again.";
+        _isValid = false;
+	}
+    private void OnFieldChanged()
+    {
+        var context = new ValidationContext(_model);
+        var results = new List<ValidationResult>();
+        _isValid = Validator.TryValidateObject(_model, context, results, true);
+    }
+
     public class CreateAccountModel
     {
         [Required(ErrorMessage = "Account name is required")]
-		public string? Name { get; set; } = "New Account Name";
+		public string? Name { get; set; }
 
 		[Required(ErrorMessage = "Account type is required")]
         public AccountType AccountType { get; set; } = AccountType.Savings;
