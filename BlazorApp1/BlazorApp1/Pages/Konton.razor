@@ -6,6 +6,7 @@
 
 <h3>Create a Account</h3>
 
+<!-- Egen custom code för custom knapp -->
 <style>
 .my-custom-btn {
     background-color: seagreen; 
@@ -54,6 +55,11 @@
     </div>
 
     <button type="submit" class="btn my-custom-btn">Create Account</button>
+    <!-- Lägg till så att knappen går ej att använda om exepctions är igång för tomt namn etc -->
+    @if (!string.IsNullOrEmpty(_errorMessage))
+    {
+        
+	}
 </EditForm>
 
 <hr />
