@@ -1,13 +1,14 @@
 ﻿@page "/MyAccounts"
+@using BlazorApp1.Interface
 @inject IAccountService AccountService
 
-<h3>My Accounts</h3>
+<h1>My Accounts</h1>
 
 <ul>
-    @if (accounts.Any())
+    @if (_accounts.Any())
     {
         <ul>
-            @foreach (var account in accounts)
+            @foreach (var account in _accounts)
             {
                 <li>@account.Name – @account.AccountType – @account.Currency – @account.Balance</li>
             }
@@ -15,16 +16,28 @@
     }
     else
     {
-        <p>Inga konton skapade än.</p>
+        <h3>You dont have any accounts yet, go to "Add Account" And add youre first account.</h3>
     }
     
 </ul>
 
 @code {
-    private List<IBankAccount> accounts = new();
-
-    protected override void OnInitialized()
+    private List<BankAccount> _accounts = new();
+    protected override async Task OnInitializedAsync()
     {
-        accounts = AccountService.GetAccounts();
+        _accounts = await AccountService.GetAccounts();
+    }
+
+    private async Task GetAccountAsync()
+    {
+        try
+        {
+            _accounts = await AccountService.GetAccounts();
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine("You are missing input");
+            throw;
+        }
     }
 }

@@ -1,27 +1,45 @@
-﻿using BlazorApp1.Domain;
-
-namespace BlazorApp1.Domain
+﻿namespace BlazorApp1.Services
 {
     public class AccountService : IAccountService
     {
-        private readonly List<IBankAccount> _accounts = new();
+        private const string StorageKey = "BlazorApp1.accounts";
+        private readonly List<BankAccount> _accounts = new();
+        private readonly IStorageService _storageService;
 
-        public IBankAccount CreateAccount(string name, AccountType accountType, string currency, decimal initialBalance)
+        private bool isLoaded;
+
+        public AccountService(IStorageService storageService) => _storageService = storageService;
+
+        private async Task IsInitialized()
         {
-            var account = new BankAccount(name, accountType, currency, initialBalance);
+            if (isLoaded)
+            {
+                return;
+            }
+            var fromStorage = await _storageService.GetItemAsync<List<BankAccount>>(StorageKey);
+            _accounts.Clear();
+            if (fromStorage is { Count: > 0 })
+            {
+                _accounts.AddRange(fromStorage);
+                isLoaded = true;
+            }     
+        }
+
+        private Task SaveAsync() => _storageService.SetItemAsync(StorageKey, _accounts);
+
+        public async Task<BankAccount> CreatAccount(string name, AccountType accountType, string currency, decimal initialBalance)
+        {
+            await IsInitialized();
+            var account = new BankAccount(Guid.NewGuid(), name, accountType, currency, initialBalance);
             _accounts.Add(account);
+            await SaveAsync();
             return account;
         }
 
-        public Task CreateAccountAsync(string name, AccountType accountType, string currency, decimal initialBalance)
+        public async Task<List<BankAccount>> GetAccounts()
         {
-            throw new NotImplementedException();
-        }
-
-        public List<IBankAccount> GetAccounts()
-        {
-            // ✅ Returnera kontona istället för att kasta ett fel
-            return _accounts;
+            await IsInitialized();
+            return _accounts.Cast<BankAccount>().ToList();
         }
     }
 }
