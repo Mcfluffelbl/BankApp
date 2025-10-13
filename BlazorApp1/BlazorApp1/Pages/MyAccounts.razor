@@ -1,7 +1,30 @@
 ﻿@page "/MyAccounts"
+@inject IAccountService AccountService
 
 <h3>My Accounts</h3>
 
+<ul>
+    @if (accounts.Any())
+    {
+        <ul>
+            @foreach (var account in accounts)
+            {
+                <li>@account.Name – @account.AccountType – @account.Currency – @account.Balance</li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p>Inga konton skapade än.</p>
+    }
+    
+</ul>
+
 @code {
-    //Lägg till lista på dem kontorna som redan finns
+    private List<IBankAccount> accounts = new();
+
+    protected override void OnInitialized()
+    {
+        accounts = AccountService.GetAccounts();
+    }
 }

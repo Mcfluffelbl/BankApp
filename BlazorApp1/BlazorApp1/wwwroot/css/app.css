@@ -1,5 +1,13 @@
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css");
+ 
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color: #062223;
+}
+.nav-item {
+    font-size: 0.9rem;
+    padding-bottom: 0.5rem;
+    align-items: center;
 }
 
 h1:focus {
@@ -8,6 +16,15 @@ h1:focus {
 
 a, .btn-link {
     color: #0071c1;
+}
+.form-row{
+    margin-bottom: 0.5rem
+}
+.form-row input{
+    border: none;
+    height: 2.2rem;
+    padding: 0.3rem 0.3rem 0.3rem 0.5rem;
+    width: 250px
 }
 
 .btn-primary {

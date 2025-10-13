@@ -33,13 +33,13 @@
     <DataAnnotationsValidator />
     <ValidationSummary />
 
-    <div class="mb-2">
+    <div class="form-row">
         <label>Account Name</label><br />
         <InputText @bind-Value="_model.Name" />
 		<ValidationMessage For="@(() => _model.Name)" />
     </div>
 
-    <div class="mb-2">
+    <div class="form-row">
         <label>Account Type</label><br />
         <InputSelect @bind-Value="_model.AccountType">
             @foreach (var type in Enum.GetValues<AccountType>())
@@ -50,13 +50,13 @@
 		<ValidationMessage For="@(() => _model.AccountType)" />
     </div>
 
-    <div class="mb-2">
+    <div class="form-row">
         <label>Currency</label><br />
         <InputText @bind-Value="_model.Currency" />
 		<ValidationMessage For="@(() => _model.Currency)" />
     </div>
 
-    <div class="mb-2">
+    <div class="form-row">
         <label>Balance</label><br />
         <InputNumber @bind-Value="_model.InitialBalance" />
 		<ValidationMessage For="@(() => _model.InitialBalance)" />
