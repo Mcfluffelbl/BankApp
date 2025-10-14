@@ -10,7 +10,7 @@
         <ul>
             @foreach (var account in _accounts)
             {
-                <li>@account.Name – @account.AccountType – @account.Currency – @account.Balance</li>
+                <li>@account.Name – @account.AccountType – @account.Currency – @account.Balance - @account.LastUpdated</li>
             }
         </ul>
     }
