@@ -28,6 +28,15 @@
     color: darkgray;
     cursor: not-allowed;
 }
+th {                     
+    cursor: pointer;
+    background-color: #f8f9fa;
+    user-select: none;
+}
+th:hover {            
+    background-color: #e9ecef;
+}
+
 </style>
 
 <EditForm Model="_model" OnValidSubmit="CreateAccountAsync" OnInvalidSubmit="HandleInvalidSubmit">
@@ -77,12 +86,39 @@
 
 @if (_accounts.Any())
 {
-    <ul>
-        @foreach (var account in _accounts)
-        {
-            <li>@account.Name – @account.AccountType – @account.Currency – @account.Balance</li>
-        }
-    </ul>
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th @onclick="() => SortBy(nameof(BankAccount.Name))">
+                    Name @GetSortIndicator(nameof(BankAccount.Name))
+                </th>
+                <th @onclick="() => SortBy(nameof(BankAccount.AccountType))">
+                    Type @GetSortIndicator(nameof(BankAccount.AccountType))
+                </th>
+                <th @onclick="() => SortBy(nameof(BankAccount.Currency))">
+                    Currency @GetSortIndicator(nameof(BankAccount.Currency))
+                </th>
+                <th @onclick="() => SortBy(nameof(BankAccount.Balance))">
+                    Balance @GetSortIndicator(nameof(BankAccount.Balance))
+                </th>
+                <th @onclick="() => SortBy(nameof(BankAccount.LastUpdated))">
+                    Last Updated @GetSortIndicator(nameof(BankAccount.LastUpdated))
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var account in _accounts)
+            {
+                <tr>
+                    <td>@account.Name</td>
+                    <td>@account.AccountType</td>
+                    <td>@account.Currency</td>
+                    <td style="text-align:right">@($"{account.Balance:N2}")</td>
+                    <td>@account.LastUpdated.ToString("g")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
 }
 else
 {
@@ -95,9 +131,13 @@ else
     private string? _errorMessage;
     private bool _isValid = false;
 
+    private string? _currentSortColumn;
+    private bool _sortAscending = true;
+
     protected override async Task OnInitializedAsync()
     {
         _accounts = await AccountService.GetAccounts();
+        SortBy(nameof(BankAccount.Name));
     }
 
     public async Task CreateAccountAsync()
@@ -113,6 +153,7 @@ else
             );
 
             _accounts = await AccountService.GetAccounts();
+			SortBy(_currentSortColumn ?? nameof(BankAccount.Name));// sortera efter den kolumnen som användaren klickade på
             _model = new CreateAccountModel(); // töm formulär
 			_isValid = false; // återställ valideringsstatus
         }
@@ -122,6 +163,53 @@ else
         }
 
         StateHasChanged();
+    }
+
+	private void SortBy(string? columnName) // SortBy metod för att sortera kolumnerna
+    {
+        if (string.IsNullOrEmpty(columnName))
+            return;
+
+        if (_currentSortColumn == columnName)
+            _sortAscending = !_sortAscending; // toggle ascending/descending
+        else
+        {
+            _currentSortColumn = columnName;
+            _sortAscending = true;
+        }
+
+        _accounts = columnName switch
+        {
+            nameof(BankAccount.Name) => _sortAscending
+                ? _accounts.OrderBy(a => a.Name).ToList()
+                : _accounts.OrderByDescending(a => a.Name).ToList(),
+
+            nameof(BankAccount.AccountType) => _sortAscending
+                ? _accounts.OrderBy(a => a.AccountType).ToList()
+                : _accounts.OrderByDescending(a => a.AccountType).ToList(),
+
+            nameof(BankAccount.Currency) => _sortAscending
+                ? _accounts.OrderBy(a => a.Currency).ToList()
+                : _accounts.OrderByDescending(a => a.Currency).ToList(),
+
+            nameof(BankAccount.Balance) => _sortAscending
+                ? _accounts.OrderBy(a => a.Balance).ToList()
+                : _accounts.OrderByDescending(a => a.Balance).ToList(),
+
+            nameof(BankAccount.LastUpdated) => _sortAscending
+                ? _accounts.OrderBy(a => a.LastUpdated).ToList()
+                : _accounts.OrderByDescending(a => a.LastUpdated).ToList(),
+
+            _ => _accounts
+        };
+    }
+
+	private string GetSortIndicator(string columnName) //GetSortIndicator metod för att visa uppåt- eller nedåtpil beroende på sorteringsordning
+    {
+        if (_currentSortColumn != columnName)
+            return string.Empty;
+
+        return _sortAscending ? "▲" : "▼";
     }
 
     private void HandleInvalidSubmit()
