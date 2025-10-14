@@ -1,10 +1,11 @@
 ﻿@page "/Konton"
 @using BlazorApp1.Domain
 @using BlazorApp1.Services
+@using BlazorApp1.Interface
 @using System.ComponentModel.DataAnnotations
 @inject IAccountService AccountService
 
-<h3>Create a Account</h3>
+<h1>Create a Account</h1>
 
 <!-- Egen custom code för custom knapp -->
 <style>
@@ -74,10 +75,10 @@
     <div class="text-danger">@_errorMessage</div>
 }
 
-@if (_createdAccounts.Any())
+@if (_accounts.Any())
 {
     <ul>
-        @foreach (var account in _createdAccounts)
+        @foreach (var account in _accounts)
         {
             <li>@account.Name – @account.AccountType – @account.Currency – @account.Balance</li>
         }
@@ -89,15 +90,14 @@ else
 }
 
 @code {
-    public CreateAccountModel _model = new();
-    public List<IBankAccount> _createdAccounts = new();
+    private CreateAccountModel _model = new();
+    private List<BankAccount> _accounts = new();
     private string? _errorMessage;
     private bool _isValid = false;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        // Hämta konton när sidan laddas
-        _createdAccounts = AccountService.GetAccounts();
+        _accounts = await AccountService.GetAccounts();
     }
 
     public async Task CreateAccountAsync()
@@ -105,14 +105,14 @@ else
         try
         {
             _errorMessage = null;
-            await AccountService.CreateAccountAsync(
+            await AccountService.CreatAccount(
                 _model.Name!,
                 _model.AccountType,
                 _model.Currency!,
                 _model.InitialBalance
             );
 
-            _createdAccounts = AccountService.GetAccounts();
+            _accounts = await AccountService.GetAccounts();
             _model = new CreateAccountModel(); // töm formulär
 			_isValid = false; // återställ valideringsstatus
         }

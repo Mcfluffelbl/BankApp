@@ -1,4 +1,4 @@
-﻿namespace BlazorApp1.Domain
+﻿namespace BlazorApp1.Interface
 {
     /// <summary>
     /// Interface containing the BankAccount methods

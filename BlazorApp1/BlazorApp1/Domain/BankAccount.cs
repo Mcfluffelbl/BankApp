@@ -1,4 +1,4 @@
-﻿using BlazorApp1.Services;
+﻿using System.Text.Json.Serialization;
 
 namespace BlazorApp1.Domain
 {
@@ -11,12 +11,23 @@ namespace BlazorApp1.Domain
         public decimal Balance { get; private set; }
         public DateTime LastUpdated { get; private set; }
 
-        public BankAccount(string name, AccountType accountType, string currency, decimal initialbalance)
+        public BankAccount(string name, AccountType accountType, string currency, decimal balance)
         {
             Name = name;
             AccountType = accountType;
             Currency = currency;
-            Balance = initialbalance;
+            Balance = balance;
+            LastUpdated = DateTime.Now;
+        }
+
+        [JsonConstructor]
+        public BankAccount(Guid id, string name, AccountType accountType, string currency, decimal balance) 
+        { 
+            Id = id;
+            Name = name;
+            Currency = currency;
+            Balance = balance;
+            AccountType = accountType;
             LastUpdated = DateTime.Now;
         }
 
