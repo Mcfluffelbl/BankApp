@@ -36,6 +36,7 @@
                         <td>@account.Currency</td>
                         <td style="text-align:right">@($"{account.Balance:N2}")</td>
                         <td>@account.LastUpdated.ToString("g")</td>
+                        <td><button class="btn btn-danger" @onclick="() => DeleteAccountAsync(account)">Delete</button></td>
                     </tr>
                 }
             </tbody>
@@ -115,4 +116,18 @@
             throw;
         }
     }
+
+    private async Task DeleteAccountAsync(IBankAccount accountId)
+    {
+        try
+        {
+            await AccountService.DeleteAccount(accountId);
+            await GetAccountAsync();
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine("Could not delete account");
+            throw;
+        }
+	}
 }
