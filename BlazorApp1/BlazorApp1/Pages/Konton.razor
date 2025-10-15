@@ -233,7 +233,7 @@ else
         public AccountType AccountType { get; set; } = AccountType.Savings;
 
 		[Required(ErrorMessage = "Currency is required")]
-        public string? Currency { get; set; } = "SEK"; //lägga till fler valutor senare?
+		public string? Currency { get; set; } = "SEK"; //lägga till fler valutor senare? Eller låsa till bara SEK?
 
 		[Range(0, double.MaxValue, ErrorMessage = "Initial balance must be non-negative")]
         public decimal InitialBalance { get; set; }
