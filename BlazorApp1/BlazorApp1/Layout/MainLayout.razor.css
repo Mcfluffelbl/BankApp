@@ -2,7 +2,7 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    background-color: #e3eed4;
+    background-color: #F7F4D1;
 }
 
 main {
@@ -14,7 +14,7 @@ main {
 }
 
 .top-row {
-    background-color: #0f2a1d;
+    background-color: #062223;
     border-bottom: 1px solid #d6d5d5;
     justify-content: flex-end;
     height: 7rem;

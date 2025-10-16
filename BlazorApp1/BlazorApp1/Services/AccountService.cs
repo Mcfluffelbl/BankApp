@@ -41,5 +41,16 @@
             await IsInitialized();
             return _accounts.Cast<BankAccount>().ToList();
         }
+
+        public async Task DeleteAccount(IBankAccount account)
+        {
+            await IsInitialized();
+            var accountToRemove = _accounts.FirstOrDefault(a => a.Id == account.Id);
+            if (account != null)
+            {
+                _accounts.Remove(accountToRemove);
+                await SaveAsync();
+            }
+        }
     }
 }
