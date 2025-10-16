@@ -127,7 +127,7 @@ else
 
 @code {
     private CreateAccountModel _model = new();
-    private List<BankAccount> _accounts = new();
+    private List<IBankAccount> _accounts = new();
     private string? _errorMessage;
     private bool _isValid = false;
 
@@ -137,7 +137,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         _accounts = await AccountService.GetAccounts();
-        SortBy(nameof(BankAccount.Name));
+        SortBy(nameof(IBankAccount.Name));
     }
 
     public async Task CreateAccountAsync()
@@ -145,7 +145,7 @@ else
         try
         {
             _errorMessage = null;
-            await AccountService.CreatAccount(
+            await AccountService.CreateAccount(
                 _model.Name!,
                 _model.AccountType,
                 _model.Currency!,
@@ -153,7 +153,7 @@ else
             );
 
             _accounts = await AccountService.GetAccounts();
-			SortBy(_currentSortColumn ?? nameof(BankAccount.Name));// sortera efter den kolumnen som användaren klickade på
+			SortBy(_currentSortColumn ?? nameof(IBankAccount.Name));// sortera efter den kolumnen som användaren klickade på
             _model = new CreateAccountModel(); // töm formulär
 			_isValid = false; // återställ valideringsstatus
         }

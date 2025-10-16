@@ -1,5 +1,6 @@
 ﻿@page "/NyTransaktion"
 @using BlazorApp1.Domain
+@inject IAccountService AccountService
 
 <style>
 .my-custom-btn2 {
@@ -22,29 +23,116 @@
 
 <h5>New Transaktion:</h5>
 
-<EditForm Model="@transaction">
-	<DataAnnotationsValidator />
-	<ValidationSummary />
-	<div class="mb-2">
-		<label>Transaction</label><br />
-		<InputText @bind-Value="transaction.Transfer" />
-		<ValidationMessage For="@(() => transaction.Transfer)" />
-	</div>
-</EditForm>
+<div class="card p-3 mt-3">
+    <div class="mb-2">
+        <label>Transaktionstyp:</label>
+        <select @bind="transactionType" class="form-select">
+            <option value="0">Insättning</option>
+            <option value="1">Uttag</option>
+            <option value="2">Överföring</option>
+        </select>
+    </div>
+
+    <div class="mb-2">
+        <label>Från konto:</label>
+        <select @bind="selectedFromAccount" class="form-select">
+            <option value="">-- Välj konto --</option>
+            @foreach (var acc in accounts)
+            {
+                <option value="@acc">@acc.Name (@acc.Balance:C)</option>
+            }
+        </select>
+    </div>
+
+    @if (transactionType == TransactionType.Transfer)
+    {
+        <div class="mb-2">
+            <label>Till konto:</label>
+            <select @bind="selectedToAccount" class="form-select">
+                <option value="">-- Välj konto --</option>
+                @foreach (var acc in accounts.Where(a => a != selectedFromAccount))
+                {
+                    <option value="@acc">@acc.Name (@acc.Balance:C)</option>
+                }
+            </select>
+        </div>
+    }
+
+    <div class="mb-2">
+        <label>Belopp:</label>
+        <input type="number" step="0.01" @bind="amount" class="form-control" />
+    </div>
+
+    <button class="btn my-custom-btn2" @onclick="ExecuteTransaction">Utför</button>
+
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <div class="alert alert-info mt-3">@message</div>
+    }
+</div>
 
 <button class="btn my-custom-btn2">Add New Transaction</button>
 
 @code {
-	//lägg till sen en funktion för att spara transaktion, koppla till Transaction?
-	private Transaction transaction = new Transaction();
+    private List<IBankAccount> accounts = new();
+    private IBankAccount? selectedFromAccount;
+    private IBankAccount? selectedToAccount;
+    private decimal amount;
+    private TransactionType transactionType;
+    private string? message;
 
-	public class Transaction
-	{
-		public string Transfer { get; set; }
-	}
-	//Överföringar: välj “från”-konto, “till”-konto samt belopp
-	//Hindra övertrassering (uttag > saldo) med tydliga felmeddelanden
-	private async Task AddTransaction()
-	{
-	}
+    protected override async Task OnInitializedAsync()
+    {
+        accounts = await AccountService.GetAccounts();
+    }
+
+    private async Task ExecuteTransaction()
+    {
+        if (selectedFromAccount == null)
+        {
+            message = "Välj ett konto att göra transaktionen från.";
+            return;
+        }
+        if (amount <= 0)
+        {
+            message = "Beloppet måste vara större än noll.";
+            return;
+        }
+
+        switch (transactionType)
+        {
+            case TransactionType.Deposit:
+                selectedFromAccount.Deposit(amount);
+                message = $"Insättning på {amount:C} till {selectedFromAccount.Name}.";
+                break;
+
+            case TransactionType.Withdrawal:
+                if (selectedFromAccount.Balance < amount)
+                {
+                    message = "Otillräckligt saldo för uttag.";
+                    return;
+                }
+                selectedFromAccount.Withdraw(amount);
+                message = $"Uttag på {amount:C} från {selectedFromAccount.Name}.";
+                break;
+
+            case TransactionType.Transfer:
+                if (selectedToAccount == null)
+                {
+                    message = "Välj ett mottagarkonto för överföring.";
+                    return;
+                }
+                if (selectedFromAccount.Balance < amount)
+                {
+                    message = "Otillräckligt saldo för överföring.";
+                    return;
+                }
+                selectedFromAccount.Withdraw(amount);
+                selectedToAccount.Deposit(amount);
+                message = $"Överförde {amount:C} från {selectedFromAccount.Name} till {selectedToAccount.Name}.";
+                break;
+        }
+        // Spara ändringar i AccountService
+        await AccountService.UpdateAccounts(accounts);
+    }
 }
