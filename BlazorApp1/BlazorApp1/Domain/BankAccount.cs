@@ -11,6 +11,8 @@ namespace BlazorApp1.Domain
         public decimal Balance { get; private set; }
         public DateTime LastUpdated { get; private set; }
 
+        private readonly List<Transaction> _transactions = new();
+
         public BankAccount(string name, AccountType accountType, string currency, decimal balance)
         {
             Name = name;
