@@ -27,10 +27,11 @@
 
         private Task SaveAsync() => _storageService.SetItemAsync(StorageKey, _accounts);
 
-        public async Task<BankAccount> CreatAccount(string name, AccountType accountType, string currency, decimal initialBalance)
+        public async Task<BankAccount> CreatAccount(string name, AccountType accountType, string currency, List<Transaction> transactions, decimal initialBalance = 0)
         {
             await IsInitialized();
-            var account = new BankAccount(Guid.NewGuid(), name, accountType, currency, initialBalance);
+            var account = new BankAccount(Guid.NewGuid(), name, accountType, currency, initialBalance, transactions = new List<Transaction>());
+            
             _accounts.Add(account);
             await SaveAsync();
             return account;
@@ -51,6 +52,40 @@
                 _accounts.Remove(accountToRemove);
                 await SaveAsync();
             }
+        }
+
+        public async Task<IReadOnlyList<BankAccount>> GetAccountsAsync()
+        {
+            await IsInitialized();
+            return _accounts.AsReadOnly();
+        }
+
+        public async Task DepositAsync(Guid accountId, decimal amount, string? note = null)
+        {
+            await IsInitialized();
+            var account = _accounts.FirstOrDefault(a => a.Id == accountId)
+            ??throw new InvalidOperationException("Account not found.");
+            account.Deposit(amount, note);
+            await SaveAsync();
+
+        }
+
+        public async Task WithdrawAsync(Guid accountId, decimal amount, string? note = null)
+        {
+            await IsInitialized();
+            var account = _accounts.FirstOrDefault(a => a.Id == accountId)
+            ?? throw new InvalidOperationException("Account not found.");
+            account.WithDraw(amount, note);
+            await SaveAsync();
+        }
+
+        public async Task<IReadOnlyList<Transaction>> GetTransactionsAsync(Guid accountId)
+        {
+            await IsInitialized();
+            var account = _accounts.FirstOrDefault(a => a.Id == accountId)
+            ?? throw new InvalidOperationException("Account not found.");
+
+            return account.transactions.AsReadOnly();
         }
     }
 }

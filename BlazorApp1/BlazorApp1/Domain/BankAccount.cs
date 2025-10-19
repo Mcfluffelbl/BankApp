@@ -33,13 +33,24 @@ namespace BlazorApp1.Domain
             LastUpdated = DateTime.Now;
         }
 
-        public void WithDraw(decimal amount)
+        public void WithDraw(decimal amount, string? note = null)
         {
-            throw new NotImplementedException();
+            if (amount <= 0)
+            {
+                if(amount <= 0) throw new ArgumentException("Withdrawal amount must be positive.", nameof(amount));
+                if(amount > Balance) throw new InvalidOperationException("Insufficient funds for this withdrawal.");
+                Balance -= amount;
+                Transaction.Add(new Transaction(Guid.NewGuid(), Id, DateTime.UtcNow, TransactionType.Withdrawal, amount, note));
+            }
         }
-        public void Deposit(decimal amount)
+        public void Deposit(decimal amount, string? note = null)
         {
-            throw new NotImplementedException();
+            if(amount <= 0)
+            {
+                throw new ArgumentException("Deposit amount must be positive.", nameof(amount));
+                Balance += amount;
+                Transaction.Add(new Transaction(Guid.NewGuid(), Id, DateTime.UtcNow, TransactionType.Deposit, amount, note));
+            }
         }  
     }
 }
