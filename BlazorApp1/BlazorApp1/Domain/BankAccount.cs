@@ -4,16 +4,17 @@ namespace BlazorApp1.Domain
 {
     public class BankAccount : IBankAccount
     {
-        public Guid Id { get; private set; }
-        public string Name { get; private set; }
-        public AccountType AccountType { get; private set; }
-        public string Currency { get; private set; }
-        public decimal Balance { get; private set; }
-        public DateTime LastUpdated { get; private set; }
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+        public AccountType AccountType { get; set; }
+        public string Currency { get; set; }
+        public decimal Balance { get; set; }
+        public DateTime LastUpdated { get; set; }
+        public List<Transaction> Transactions { get; set; } = new();
 
-        public List<Transaction> Transactions { get; private set; } = new();
+        public BankAccount() { }
 
-        public BankAccount(Guid id, string name, AccountType accountType, string currency, decimal initialBalance)
+        public BankAccount(Guid id, string name, AccountType accountType, string currency, decimal initialBalance) //Fel?
         {
             Id = id;
             Name = name;
