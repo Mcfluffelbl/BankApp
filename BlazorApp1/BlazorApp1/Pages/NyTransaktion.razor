@@ -3,43 +3,45 @@
 @inject IAccountService AccountService
 
 <style>
-.my-custom-btn2 {
-    background-color: seagreen; 
-    color: aliceblue;
-    border: none;
-    transition: background-color 0.3s ease, transform 0.1s ease;
-}
-.my-custom-btn2:hover {
-    background-color: darkolivegreen; 
-    transform: scale(1.03);
-}
-.my-custom-btn2:active {
-    background-color: grey;
-    transform: scale(0.98);
-}
+    .my-custom-btn2 {
+        background-color: seagreen;
+        color: aliceblue;
+        border: none;
+        transition: background-color 0.3s ease, transform 0.1s ease;
+    }
+
+        .my-custom-btn2:hover {
+            background-color: darkolivegreen;
+            transform: scale(1.03);
+        }
+
+        .my-custom-btn2:active {
+            background-color: grey;
+            transform: scale(0.98);
+        }
 </style>
 
 <h1>Transaktion</h1>
 
-<h5>New Transaktion:</h5>
+<h5>Ny transaktion:</h5>
 
 <div class="card p-3 mt-3">
     <div class="mb-2">
         <label>Transaktionstyp:</label>
         <select @bind="transactionType" class="form-select">
-            <option value="0">Insättning</option>
-            <option value="1">Uttag</option>
-            <option value="2">Överföring</option>
+            <option value="0">Deposit</option>
+            <option value="1">Withdraw</option>
+            <option value="2">Transfer</option>
         </select>
     </div>
 
     <div class="mb-2">
-        <label>Från konto:</label>
-        <select @bind="selectedFromAccount" class="form-select">
-            <option value="">-- Välj konto --</option>
+        <label>From account:</label>
+        <select class="form-select" @bind="selectedFromAccountId">
+            <option value="">-- Choose a account --</option>
             @foreach (var acc in accounts)
             {
-                <option value="@acc">@acc.Name (@acc.Balance:C)</option>
+                <option value="@acc.Id">@acc.Name (@acc.Balance:C)</option>
             }
         </select>
     </div>
@@ -47,19 +49,19 @@
     @if (transactionType == TransactionType.Transfer)
     {
         <div class="mb-2">
-            <label>Till konto:</label>
-            <select @bind="selectedToAccount" class="form-select">
-                <option value="">-- Välj konto --</option>
-                @foreach (var acc in accounts.Where(a => a != selectedFromAccount))
+            <label>To account:</label>
+            <select class="form-select" @bind="selectedToAccountId">
+                <option value="">-- Choose a account --</option>
+                @foreach (var acc in accounts.Where(a => a.Id != selectedFromAccountId))
                 {
-                    <option value="@acc">@acc.Name (@acc.Balance:C)</option>
+                    <option value="@acc.Id">@acc.Name (@acc.Balance:C)</option>
                 }
             </select>
         </div>
     }
 
     <div class="mb-2">
-        <label>Belopp:</label>
+        <label>Amount:</label>
         <input type="number" step="0.01" @bind="amount" class="form-control" />
     </div>
 
@@ -71,15 +73,19 @@
     }
 </div>
 
-<button class="btn my-custom-btn2">Add New Transaction</button>
-
 @code {
     private List<IBankAccount> accounts = new();
-    private IBankAccount? selectedFromAccount;
-    private IBankAccount? selectedToAccount;
+    private Guid? selectedFromAccountId;
+    private Guid? selectedToAccountId;
     private decimal amount;
     private TransactionType transactionType;
     private string? message;
+
+    private IBankAccount? SelectedFromAccount =>
+        accounts.FirstOrDefault(a => a.Id == selectedFromAccountId);
+
+    private IBankAccount? SelectedToAccount =>
+        accounts.FirstOrDefault(a => a.Id == selectedToAccountId);
 
     protected override async Task OnInitializedAsync()
     {
@@ -88,51 +94,54 @@
 
     private async Task ExecuteTransaction()
     {
-        if (selectedFromAccount == null)
+        var from = SelectedFromAccount;
+        var to = SelectedToAccount;
+
+        if (from == null)
         {
-            message = "Välj ett konto att göra transaktionen från.";
+            message = "Chosse an account to transfer from.";
             return;
         }
         if (amount <= 0)
         {
-            message = "Beloppet måste vara större än noll.";
+            message = "The amount needs to be bigger than 0.";
             return;
         }
 
         switch (transactionType)
         {
             case TransactionType.Deposit:
-                selectedFromAccount.Deposit(amount);
-                message = $"Insättning på {amount:C} till {selectedFromAccount.Name}.";
+                from.Deposit(amount);
+                message = $"Deposited amount: {amount:C} to {from.Name}.";
                 break;
 
             case TransactionType.Withdrawal:
-                if (selectedFromAccount.Balance < amount)
+                if (from.Balance < amount)
                 {
-                    message = "Otillräckligt saldo för uttag.";
+                    message = "Not enough balance to takeout.";
                     return;
                 }
-                selectedFromAccount.Withdraw(amount);
-                message = $"Uttag på {amount:C} från {selectedFromAccount.Name}.";
+                from.Withdraw(amount);
+                message = $"Withdrawd amount:{amount:C} from {from.Name}.";
                 break;
 
             case TransactionType.Transfer:
-                if (selectedToAccount == null)
+                if (to == null)
                 {
-                    message = "Välj ett mottagarkonto för överföring.";
+                    message = "Choice an account to transfer to.";
                     return;
                 }
-                if (selectedFromAccount.Balance < amount)
+                if (from.Balance < amount)
                 {
-                    message = "Otillräckligt saldo för överföring.";
+                    message = "Not high enough amount at deposit.";
                     return;
                 }
-                selectedFromAccount.Withdraw(amount);
-                selectedToAccount.Deposit(amount);
-                message = $"Överförde {amount:C} från {selectedFromAccount.Name} till {selectedToAccount.Name}.";
+                from.Withdraw(amount);
+                to.Deposit(amount);
+                message = $"Transferd: {amount:C} from {from.Name} to {to.Name}.";
                 break;
         }
-        // Spara ändringar i AccountService
+
         await AccountService.UpdateAccounts(accounts);
     }
 }
