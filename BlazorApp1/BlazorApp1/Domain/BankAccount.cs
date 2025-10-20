@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
-using Bankapp2.Interfaces;
+using BlazorApp1.Interface;
 
-namespace Bankapp2.Domain
+namespace BlazorApp1.Domain
 {
     public class BankAccount : IBankAccount
     {
