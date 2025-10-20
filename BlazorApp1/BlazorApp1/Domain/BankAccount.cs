@@ -1,13 +1,14 @@
 ﻿using System.Text.Json.Serialization;
+using Bankapp2.Interfaces;
 
-namespace BlazorApp1.Domain
+namespace Bankapp2.Domain
 {
     public class BankAccount : IBankAccount
     {
-        public Guid Id {  get; private set; } = Guid.NewGuid();
+        public Guid Id { get; private set; } = Guid.NewGuid();
         public AccountType AccountType { get; private set; }
-        public string Name {  get; private set; }
-        public string Currency { get; private set; }
+        public string Name { get; private set; } = string.Empty;
+        public string Currency { get; private set; } = string.Empty;
         public decimal Balance { get; private set; }
         public DateTime LastUpdated { get; private set; }
 
@@ -21,8 +22,8 @@ namespace BlazorApp1.Domain
         }
 
         [JsonConstructor]
-        public BankAccount(Guid id, string name, AccountType accountType, string currency, decimal balance) 
-        { 
+        public BankAccount(Guid id, string name, AccountType accountType, string currency, decimal balance)
+        {
             Id = id;
             Name = name;
             Currency = currency;
