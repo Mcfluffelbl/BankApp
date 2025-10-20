@@ -1,23 +1,36 @@
-﻿using Bankapp2.Domain;
-using Bankapp.Interfaces;
-
-namespace BlazorApp1.Services
+﻿namespace BlazorApp1.Services
 {
     public class AccountService : IAccountService
     {
         // Här sparar vi konton i minnet (du kan senare byta till databas)
         private readonly List<BankAccount> _accounts = new();
+        private readonly IStorageService _storageService;
+        private bool isLoaded;
 
-        // Skapa nytt konto
-        public BankAccount CreateAccount(string name, AccountType accountType, CurrencyType currency, decimal initialBalance = 0m)
+        public AccountService(IStorageService storageService)
         {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Account name cannot be empty.", nameof(name));
+            _storageService = storageService;
+        }
+
+        private async Task IsInitialized()
+        {
+            if (isLoaded)
+                return;
+
+            var fromStorage = await _storageService.GetItemAsync<List<BankAccount>>(StorageKey);
+            _accounts.Clear();
+
+            if (fromStorage is { Count: > 0 })
+                _accounts.AddRange(fromStorage);
+
+            isLoaded = true;
+        }
+        }
 
 <<<<<<< Updated upstream
         private Task SaveAsync() => _storageService.SetItemAsync(StorageKey, _accounts);
 
-        public async Task<BankAccount> CreatAccount(string name, AccountType accountType, string currency, decimal initialBalance)
+        public async Task<IBankAccount> CreateAccount(string name, AccountType accountType, string currency, decimal initialBalance)
         {
             await IsInitialized();
             var account = new BankAccount(Guid.NewGuid(), name, accountType, currency, initialBalance);
@@ -27,70 +40,31 @@ namespace BlazorApp1.Services
             _accounts.Add(account);
             return account;
         }
-
-        // Hämta alla konton (read-only)
-        public IReadOnlyList<BankAccount> GetAllAccounts()
+        public async Task<List<IBankAccount>> GetAccounts()
+        public async Task<List<BankAccount>> GetAccounts()
         {
 <<<<<<< Updated upstream
             await IsInitialized();
-            return _accounts.Cast<BankAccount>().ToList();
+            return _accounts.Cast<IBankAccount>().ToList();
         }
 
         public async Task DeleteAccount(IBankAccount account)
         {
             await IsInitialized();
             var accountToRemove = _accounts.FirstOrDefault(a => a.Id == account.Id);
-            if (account != null)
+            if (accountToRemove != null)
             {
                 _accounts.Remove(accountToRemove);
                 await SaveAsync();
+        }
+
+        public async Task UpdateAccounts(List<IBankAccount> updatedAccounts)
+        {
+            await IsInitialized();
+            _accounts.Clear();
+            _accounts.AddRange(updatedAccounts.Cast<BankAccount>());
+            await SaveAsync();
             }
-=======
-            return _accounts.AsReadOnly();
-        }
-
-        // Hämta konto via ID
-        public BankAccount? GetAccountById(Guid accountId)
-        {
-            return _accounts.FirstOrDefault(a => a.Id == accountId);
-        }
-
-        // Sätt in pengar
-        public void Deposit(Guid accountId, decimal amount, string? note = null)
-        {
-            var account = GetAccountById(accountId) ?? throw new ArgumentException("Account not found.", nameof(accountId));
-            account.Deposit(amount, note);
-        }
-
-        // Ta ut pengar
-        public void Withdraw(Guid accountId, decimal amount, string? note = null)
-        {
-            var account = GetAccountById(accountId) ?? throw new ArgumentException("Account not found.", nameof(accountId));
-            account.Withdraw(amount, note);
-        }
-
-        // Överföring mellan två konton
-        public void Transfer(Guid fromAccountId, Guid toAccountId, decimal amount, string? note = null)
-        {
-            if (fromAccountId == toAccountId)
-                throw new InvalidOperationException("Cannot transfer to the same account.");
-
-            var fromAccount = GetAccountById(fromAccountId) ?? throw new ArgumentException("Source account not found.", nameof(fromAccountId));
-            var toAccount = GetAccountById(toAccountId) ?? throw new ArgumentException("Destination account not found.", nameof(toAccountId));
-
-            fromAccount.Withdraw(amount, note);
-            toAccount.Deposit(amount, note);
-        }
-
-        // Ta bort konto
-        public bool DeleteAccount(Guid accountId)
-        {
-            var account = GetAccountById(accountId);
-            if (account == null)
-                return false;
-
-            return _accounts.Remove(account);
->>>>>>> Stashed changes
         }
     }
 }
