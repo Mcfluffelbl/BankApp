@@ -28,7 +28,7 @@
 
         private Task SaveAsync() => _storageService.SetItemAsync(StorageKey, _accounts);
 
-        public async Task<IBankAccount> CreateAccount(string name, AccountType accountType, string currency, decimal initialBalance)
+        public async Task<IBankAccount> CreateAccount(string name, AccountType accountType, string currency, decimal initialBalance) //Liknande transaktion?
         {
             await IsInitialized();
             var account = new BankAccount(Guid.NewGuid(), name, accountType, currency, initialBalance);

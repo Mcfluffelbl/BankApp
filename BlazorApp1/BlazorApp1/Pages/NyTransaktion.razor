@@ -29,9 +29,10 @@
     <div class="mb-2">
         <label>Transaktionstyp:</label>
         <select @bind="transactionType" class="form-select">
-            <option value="0">Deposit</option>
-            <option value="1">Withdraw</option>
-            <option value="2">Transfer</option>
+            @foreach (TransactionType type in Enum.GetValues(typeof(TransactionType)))
+            {
+                <option value="@type">@type</option>
+            }
         </select>
     </div>
 
@@ -73,12 +74,22 @@
     }
 </div>
 
+<div class="card p-3 mt-3">
+    <h5>Account Balances:</h5>
+    <ul>
+        @foreach (var acc in accounts)
+        {
+            <li>@acc.Name: @acc.Balance:C</li>
+        }
+    </ul>
+</div>
+
 @code {
     private List<IBankAccount> accounts = new();
     private Guid? selectedFromAccountId;
     private Guid? selectedToAccountId;
     private decimal amount;
-    private TransactionType transactionType;
+    private TransactionType transactionType = TransactionType.Deposit;
     private string? message;
 
     private IBankAccount? SelectedFromAccount =>
