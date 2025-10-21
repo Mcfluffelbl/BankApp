@@ -2,6 +2,7 @@
 @using BlazorApp1.Interface
 @using BlazorApp1.Domain
 @inject IAccountService AccountService
+@inject Transaction Transaction
 
 
 	
@@ -64,8 +65,8 @@
 	<h5>Transaction History will be displayed here:</h5>
 
 </div>
-<ul>
-    @if (_accounts.Any())
+@* <ul>
+    @if (Deposit.Any())
     {
         <table class="table table-striped table-bordered">
             <thead>
@@ -88,12 +89,12 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var account in _accounts)
+                @foreach (var trans in Transaction)
                 {
                     <tr>
                         <td>@account.Name</td>
                         <td>@account.Currency</td>
-						<td>@account.Deposit</td> @* lägg till så detta är kopplat med transaktionshistoriken *@
+						<td>@account.Deposit</td> @* lägg till så detta är kopplat med transaktionshistoriken 
                         <td style="text-align:right">@($"{account.Balance:N2}")</td>
                         <td>@account.LastUpdated.ToString("g")</td>
                     </tr>
@@ -103,16 +104,18 @@
     }
     else
     {
-        <h3>You dont have any accounts yet, go to "Add Account" And add youre first account.</h3>
+        <h3>You dont have any tranfer.</h3>
     }
 
-</ul>
+</ul> *@
 
 @code {
     private List<IBankAccount> _accounts = new();
     private string? _currentSortColumn;
     private bool _sortAscending = true;
     private List<IBankAccount> accounts = new();
+
+	private List<Transaction> Transactions = new();
 
 	//sätt in logik för att hämta transaktionshistorik per konto
 
