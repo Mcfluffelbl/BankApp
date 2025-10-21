@@ -65,8 +65,8 @@
 	<h5>Transaction History will be displayed here:</h5>
 
 </div>
-@* <ul>
-    @if (Deposit.Any())
+<ul>
+    @if (_transactionsRows.Any())
     {
         <table class="table table-striped table-bordered">
             <thead>
@@ -89,12 +89,12 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var trans in Transaction)
+                @foreach (var trans in _transactionsRows)
                 {
                     <tr>
-                        <td>@account.Name</td>
+                        <td>@tx.FromName</td>
                         <td>@account.Currency</td>
-						<td>@account.Deposit</td> @* lägg till så detta är kopplat med transaktionshistoriken 
+						<td>@account.Deposit</td>  
                         <td style="text-align:right">@($"{account.Balance:N2}")</td>
                         <td>@account.LastUpdated.ToString("g")</td>
                     </tr>
@@ -107,7 +107,7 @@
         <h3>You dont have any tranfer.</h3>
     }
 
-</ul> *@
+</ul>
 
 @code {
     private List<BankAccount> _accounts = new();
@@ -115,14 +115,36 @@
     private bool _sortAscending = true;
     private List<BankAccount> accounts = new();
 
-	private List<Transaction> Transactions = new();
+    //nytt
+    private List<TransactionRow> _transactionsRows = new();
+    //nytt
+    private class TransactionRow
+    {
+        public NyTransaktion nyTransaktion { get; set; } = null!;
+        public string FromName { get; set; } = string.Empty;
+        public string ToName { get; set; } = string.Empty;
+        public DateTime Date { get; set; }
+    }
 
-	//sätt in logik för att hämta transaktionshistorik per konto
-
+    //sätt in logik för att hämta transaktionshistorik per konto
 
     protected override async Task OnInitializedAsync()
     {
         _accounts = await AccountService.GetAccounts();
+
+        //nytt
+        var accountById = _accounts.ToDictionary(a => a.Id, a => a.Name);
+
+        _transactionsRows = _accounts
+        .SelectMany(acc => acc.NyTransaktion.Select(tx => new TransactionRow
+        {
+            nyTransaktion = tx,
+            FromName = tx.FromAccount.HasValue && accountById.TryGetValue(tx.FromAccount.Value, out var fn) ? fn : string.Empty,
+            ToName = tx.ToAccount.HasValue && accountById.TryGetValue(tx.ToAccount.Value, out var tn) ? tn : string.Empty,
+        }))
+        .OrderByDescending(tr => tr.nyTransaktion.Date)
+		.ToList();
+
     }
     private void SortBy(string? columnName) // SortBy metod för att sortera kolumnerna
     {
