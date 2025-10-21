@@ -42,7 +42,7 @@
             <option value="">-- Choose a account --</option>
             @foreach (var acc in accounts)
             {
-                <option value="@acc.Id">@acc.Name (@acc.Balance:C)</option>
+                <option value="@acc.Id">@acc.Name: @acc.Balance @acc.Currency</option>
             }
         </select>
     </div>
@@ -55,7 +55,7 @@
                 <option value="">-- Choose a account --</option>
                 @foreach (var acc in accounts.Where(a => a.Id != selectedFromAccountId))
                 {
-                    <option value="@acc.Id">@acc.Name (@acc.Balance:C)</option>
+                    <option value="@acc.Id">@acc.Name: @acc.Balance @acc.Currency</option>
                 }
             </select>
         </div>
@@ -79,7 +79,7 @@
     <ul>
         @foreach (var acc in accounts)
         {
-            <li>@acc.Name: @acc.Balance:C</li>
+            <li>@acc.Name: @acc.Balance @acc.Currency</li>
         }
     </ul>
 </div>

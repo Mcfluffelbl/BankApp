@@ -14,7 +14,7 @@ namespace BlazorApp1.Domain
 
         public BankAccount() { }
 
-        public BankAccount(Guid id, string name, AccountType accountType, string currency, decimal initialBalance) //Fel?
+        public BankAccount(Guid id, string name, AccountType accountType, string currency, decimal initialBalance)
         {
             Id = id;
             Name = name;
