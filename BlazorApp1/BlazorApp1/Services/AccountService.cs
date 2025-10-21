@@ -28,7 +28,7 @@
 
         private Task SaveAsync() => _storageService.SetItemAsync(StorageKey, _accounts);
 
-        public async Task<IBankAccount> CreateAccount(string name, AccountType accountType, string currency, decimal initialBalance) //Liknande transaktion?
+        public async Task<BankAccount> CreateAccount(string name, AccountType accountType, string currency, decimal initialBalance) //Liknande transaktion?
         {
             await IsInitialized();
             var account = new BankAccount(Guid.NewGuid(), name, accountType, currency, initialBalance);
@@ -37,10 +37,10 @@
             return account;
         }
 
-        public async Task<List<IBankAccount>> GetAccounts()
+        public async Task<List<BankAccount>> GetAccounts()
         {
             await IsInitialized();
-            return _accounts.Cast<IBankAccount>().ToList();
+            return _accounts.Cast<BankAccount>().ToList();
         }
 
         public async Task DeleteAccount(IBankAccount account)
@@ -60,6 +60,18 @@
             _accounts.Clear();
             _accounts.AddRange(updatedAccounts.Cast<BankAccount>());
             await SaveAsync();
+        }
+
+        public void Transfer(Guid fromAccountId, Guid toAccountId, decimal amount)
+        {
+            var fromAccount = _accounts.FirstOrDefault(a => a.Id == fromAccountId);
+            var toAccount = _accounts.FirstOrDefault(a => a.Id == toAccountId);
+            if (fromAccount == null)
+                throw new ArgumentException("From account not found");
+            if (toAccount == null)
+                throw new ArgumentException("To account not found");
+            fromAccount.Transfer(toAccount, amount);
+            //SaveAsync().Wait();
         }
     }
 }
