@@ -43,7 +43,7 @@
             return _accounts.Cast<BankAccount>().ToList();
         }
 
-        public async Task DeleteAccount(IBankAccount account)
+        public async Task DeleteAccount(BankAccount account)
         {
             await IsInitialized();
             var accountToRemove = _accounts.FirstOrDefault(a => a.Id == account.Id);
@@ -54,7 +54,7 @@
             }
         }
 
-        public async Task UpdateAccounts(List<IBankAccount> updatedAccounts)
+        public async Task UpdateAccounts(List<BankAccount> updatedAccounts)
         {
             await IsInitialized();
             _accounts.Clear();
@@ -81,7 +81,7 @@
                 throw new ArgumentException("Account not found");
 
             toAccount.Deposit(amount);
-            _storageService.SetItemAsync(StorageKey, _accounts);
+            //await _storageService.SetItemAsync(StorageKey, _accounts);
         }
 
         public void Withdraw(Guid fromAccountId, decimal amount)
@@ -91,7 +91,7 @@
                 throw new ArgumentException("Account not found");
 
             fromAccount.Withdraw(amount);
-            _storageService.SetItemAsync(StorageKey, _accounts);
+            //_storageService.SetItemAsync(StorageKey, _accounts);
         }
     }
 }

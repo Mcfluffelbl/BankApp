@@ -4,7 +4,7 @@ namespace BlazorApp1.Domain
 {
     public class BankAccount : IBankAccount
     {
-        public Guid Id { get; set; }
+        public Guid Id { get; private set;  } = Guid.NewGuid();
         public string Name { get; set; }
         public AccountType AccountType { get; set; }
         public string Currency { get; set; }
@@ -46,6 +46,7 @@ namespace BlazorApp1.Domain
                 TransactionType = TransactionType.Deposit,
                 Date = DateTime.Now,
                 FromAccount = Id,
+                ToAccount = null,
                 BalanceAfterTransaction = Balance
             });
         }

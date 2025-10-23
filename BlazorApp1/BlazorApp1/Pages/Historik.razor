@@ -4,6 +4,7 @@
 @using BlazorApp1.Interface
 @inject IAccountService AccountService
 
+
 <h1>History</h1>
 
 @if (_accounts.Count == 0)
@@ -19,7 +20,7 @@ else
             @bind-Value="SelectedAccountId">
             @foreach (var account in _accounts)
             {
-                <option value="@account.Id">@account.Name - Saldo: @account.Balance</option>
+                <option value="@account.Id">@account.Name - Saldo: @account.Balance @account.Currency</option>
             }
         </InputSelect>
     </div>
@@ -58,16 +59,10 @@ else
                         <td>@transaction.TransactionType</td>
                         <td>@transaction.BalanceAfterTransaction</td>
                         <td>
-                            @{
-
-                                string fromName = transaction.FromAccount.HasValue
-                                ? _accounts.FirstOrDefault(a => a.Id == transaction.FromAccount.Value)?.Name ?? "Okänt konto"
-                                : "";
-                                string toName = transaction.ToAccount.HasValue
-                                ? _accounts.FirstOrDefault(a => a.Id == transaction.ToAccount.Value)?.Name ?? "Okänt konto"
-                                : "";
+                            @if (transaction.FromAccount.HasValue || transaction.ToAccount.HasValue)
+                            {
+                                <span>@(transaction.FromAccount.ToString()[..4]) ->  @((transaction.ToAccount?.ToString()[..4]) ?? "" )</span>
                             }
-                            <span>@fromName - @toName</span>
                         </td>
                     </tr>
                 }
@@ -78,7 +73,7 @@ else
 
 @code {
     private List<BankAccount> _accounts;
-    private IBankAccount? _selectedAccount;
+    private BankAccount? _selectedAccount;
     private Guid _selectedAccountId;
 
     //Startvärde för sorteringen
@@ -114,6 +109,7 @@ else
                 return;
             _selectedAccountId = value;
             _selectedAccount = _accounts.FirstOrDefault(account => account.Id == value);
+            StateHasChanged();
         }
     }
 

@@ -5,7 +5,7 @@
     /// </summary>
     public interface IBankAccount
     {
-        Guid Id { get; }
+        Guid Id { get; } 
         string Name { get; }
         AccountType AccountType { get; }
         string Currency { get; }
