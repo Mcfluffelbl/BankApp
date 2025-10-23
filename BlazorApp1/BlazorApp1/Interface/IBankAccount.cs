@@ -11,6 +11,7 @@
         string Currency { get; }
         decimal Balance { get; }
         DateTime LastUpdated { get; }
+        IReadOnlyList<Transaction> Transactions { get; }
 
         void Deposit(decimal amount);
         void Withdraw(decimal amount);

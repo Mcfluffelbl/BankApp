@@ -11,6 +11,9 @@ namespace BlazorApp1.Domain
         public decimal Balance { get; set; }
         public DateTime LastUpdated { get; set; }
         private readonly List<Transaction> _transactions = new();
+
+        public IReadOnlyList<Transaction> Transactions => _transactions;
+
         public BankAccount(string name, AccountType accountType, string currency, decimal initialBalance)
         {
             Name = name;
@@ -37,42 +40,69 @@ namespace BlazorApp1.Domain
             Balance += amount;
             LastUpdated = DateTime.Now;
 
-            _transactions.Add(new Transaction { Amount = amount });
-            
+            _transactions.Add(new Transaction
+            {
+                Amount = amount,
+                TransactionType = TransactionType.Deposit,
+                Date = DateTime.Now,
+                FromAccount = Id,
+                BalanceAfterTransaction = Balance
+            });
         }
+
         public void Withdraw(decimal amount)
         {
             if (amount <= 0)
                 throw new ArgumentException("The amount withdrawn needs to be bigger than 0");
 
             if (Balance < amount)
-                throw new InvalidOperationException("Incinifcent amount");
+                throw new InvalidOperationException("Insufficient amount");
 
             Balance -= amount;
             LastUpdated = DateTime.Now;
 
-            _transactions.Add(new Transaction { Amount = amount });
+            _transactions.Add(new Transaction
+            {
+                Amount = -amount, // Negativt belopp vid uttag
+                TransactionType = TransactionType.Withdrawal,
+                Date = DateTime.Now,
+                FromAccount = Id,
+                BalanceAfterTransaction = Balance
+            });
         }
 
         public void Transfer(BankAccount to, decimal amount)
         {
+            if (amount <= 0)
+                throw new ArgumentException("The amount transferred needs to be bigger than 0");
+
+            if (Balance < amount)
+                throw new InvalidOperationException("Insufficient amount");
+
             Balance -= amount;
             LastUpdated = DateTime.Now;
+
             _transactions.Add(new Transaction
-            { 
-                Amount = amount,
-                TransactionType = TransactionType.Transferout,
+            {
+                Amount = -amount, // Negativt belopp för utgående transfer
+                TransactionType = TransactionType.Transfer,
+                Date = DateTime.Now,
                 FromAccount = Id,
-                ToAccount = to.Id
+                ToAccount = to.Id,
+                BalanceAfterTransaction = Balance
             });
-            
+
             to.Balance += amount;
             to.LastUpdated = DateTime.Now;
+
             to._transactions.Add(new Transaction
             {
                 Amount = amount,
-                TransactionType = TransactionType.Transferin,
-                FromAccount = Id
+                TransactionType = TransactionType.Transfer,
+                Date = DateTime.Now,
+                FromAccount = Id,
+                ToAccount = to.Id,
+                BalanceAfterTransaction = to.Balance
             });
         }
     }
