@@ -1,230 +1,227 @@
-﻿@page "/Historik"
-@using BlazorApp1.Interface
-@using BlazorApp1.Domain
+﻿@page "/History"
 @inject IAccountService AccountService
-@inject Transaction Transaction
 
+<h1>History</h1>
 
-	
-	<PageTitle>History</PageTitle>
+@* <EditForm Model="_filterModel">
+    <div class="accountfield">
+        <label>Select Account:</label>
+        <InputSelect TValue="Guid"
+                     class="inputfield"
+                     Value="_filterModel.SelectedAccountId"
+                     ValueChanged="(Guid v) => { _filterModel.SelectedAccountId = v; ApplyFilters(); }"
+                     ValueExpression="() => _filterModel.SelectedAccountId">
+            <option value="@Guid.Empty">Choose account</option>
+            @foreach (var account in _accounts)
+            {
+                <option value="@account.Id">@account.Name: @account.Currency</option>
+            }
+        </InputSelect>
+    </div>
 
-	<h1>History</h1>
-
-<br />
-
-<h2>My Accounts</h2>
-
-<ul>
-    @if (_accounts.Any())
+    @if (_filterModel.SelectedAccountId != Guid.Empty)
     {
-        <table class="table table-striped table-bordered">
-            <thead>
-                <tr>
-                    <th @onclick="() => SortBy(nameof(BankAccount.Name))">
-                        Name @GetSortIndicator(nameof(BankAccount.Name))
-                    </th>
-                    <th @onclick="() => SortBy(nameof(BankAccount.AccountType))">
-                        Type @GetSortIndicator(nameof(BankAccount.AccountType))
-                    </th>
-                    <th @onclick="() => SortBy(nameof(BankAccount.Currency))">
-                        Currency @GetSortIndicator(nameof(BankAccount.Currency))
-                    </th>
-                    <th @onclick="() => SortBy(nameof(BankAccount.Balance))">
-                        Balance @GetSortIndicator(nameof(BankAccount.Balance))
-                    </th>
-                    <th @onclick="() => SortBy(nameof(BankAccount.LastUpdated))">
-                        Last Updated @GetSortIndicator(nameof(BankAccount.LastUpdated))
-                    </th>
+        <div class="accountfield">
+            <label>Transaction Type:</label>
+            <InputSelect TValue="TransactionType?"
+                         class="inputfield"
+                         Value="_filterModel.TransactionType"
+                         ValueChanged="(TransactionType? v) => { _filterModel.TransactionType = v; ApplyFilters(); }"
+                         ValueExpression="() => _filterModel.TransactionType">
+                <option value="">All types</option>
+                <option value="@TransactionType.Deposit">Deposit</option>
+                <option value="@TransactionType.Withdrawal">Withdrawal</option>
+                <option value="@TransactionType.Transfer">Transfer</option>
+            </InputSelect>
+        </div>
+
+        <div class="accountfield">
+            <label>From Date:</label>
+            <InputDate TValue="DateTime?" class="inputfield"
+                       Value="_filterModel.FromDate"
+                       ValueChanged="(DateTime? v) => { _filterModel.FromDate = v; ApplyFilters(); }"
+                       ValueExpression="() => _filterModel.FromDate" />
+        </div>
+
+        <div class="accountfield">
+            <label>To Date:</label>
+            <InputDate TValue="DateTime?" class="inputfield"
+                       Value="_filterModel.ToDate"
+                       ValueChanged="(DateTime? v) => { _filterModel.ToDate = v; ApplyFilters(); }"
+                       ValueExpression="() => _filterModel.ToDate" />
+        </div>
+
+        <div class="accountfield">
+            <label>Min Amount:</label>
+            <InputNumber TValue="decimal?" class="inputfield"
+                         Value="_filterModel.MinAmount"
+                         ValueChanged="(decimal? v) => { _filterModel.MinAmount = v; ApplyFilters(); }"
+                         ValueExpression="() => _filterModel.MinAmount" />
+        </div>
+
+        <div class="accountfield">
+            <label>Max Amount:</label>
+            <InputNumber TValue="decimal?" class="inputfield"
+                         Value="_filterModel.MaxAmount"
+                         ValueChanged="(decimal? v) => { _filterModel.MaxAmount = v; ApplyFilters(); }"
+                         ValueExpression="() => _filterModel.MaxAmount" />
+        </div>
+
+        <div class="accountfield">
+            <label>Sort By:</label>
+            <InputSelect TValue="string" class="inputfield"
+                         Value="_filterModel.SortOption"
+                         ValueChanged="(string v) => { _filterModel.SortOption = v; ApplyFilters(); }"
+                         ValueExpression="() => _filterModel.SortOption">
+                <option value="date_desc">Date (Newest)</option>
+                <option value="date_asc">Date (Oldest)</option>
+                <option value="amount_desc">Amount (High → Low)</option>
+                <option value="amount_asc">Amount (Low → High)</option>
+                <option value="type">Type</option>
+            </InputSelect>
+        </div>
+
+        <button type="button" class="formbutton" @onclick="ResetFilters">Reset</button>
+    }
+</EditForm>
+
+@if (_filterModel.SelectedAccountId == Guid.Empty)
+{
+    <div class="accountfield"><p>Please select an account to view its history.</p></div>
+}
+else if (_transactions == null)
+{
+    <div class="accountfield"><p>Loading transactions...</p></div>
+}
+else if (!_transactions.Any())
+{
+    <div class="accountfield"><p>No transactions found.</p></div>
+}
+else
+{
+    <table class="table-auto w-full border-collapse border border-gray-300 mt-4 mb-5">
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="border px-4 py-2">Date</th>
+                <th class="border px-4 py-2">Account</th>
+                <th class="border px-4 py-2">Type</th>
+                <th class="border px-4 py-2">Amount</th>
+                <th class="border px-4 py-2">Related Account</th>
+                <th class="border px-4 py-2">Description</th>
+                <th class="border px-4 py-2">Balance After</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var t in _transactions)
+            {
+                <tr class="@GetTransactionRowClass(t.Type)">
+                    <td class="border px-4 py-2">@t.Timestamp.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td class="border px-4 py-2">@GetAccountName(t.AccountId)</td>
+                    <td class="border px-4 py-2">@t.Type</td>
+                    <td class="border px-4 py-2">@t.Amount.ToString("F2")</td>
+                    <td class="border px-4 py-2">@t.RelatedAccountName</td>
+                    <td class="border px-4 py-2">@t.Description</td>
+                    <td class="border px-4 py-2">@t.BalanceAfter.ToString("F2")</td>
                 </tr>
-            </thead>
-            <tbody>
-                @foreach (var account in _accounts)
-                {
-                    <tr>
-                        <td>@account.Name</td>
-                        <td>@account.AccountType</td>
-                        <td>@account.Currency</td>
-                        <td style="text-align:right">@($"{account.Balance:N2}")</td>
-                        <td>@account.LastUpdated.ToString("g")</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
-    else
-    {
-        <h3>You dont have any accounts yet, go to "Add Account" And add youre first account.</h3>
-    }
-
-</ul>
-
-<br />
-
-<div>
-	<h2>Transaction History</h2>
-	<h5>Transaction History will be displayed here:</h5>
-
-</div>
-<ul>
-    @if (_transactionsRows.Any())
-    {
-        <table class="table table-striped table-bordered">
-            <thead>
-                <tr>
-                    <th @onclick="() => SortBy(nameof(Transaction.AccountId))">
-                        Name @GetSortIndicator(nameof(Transaction.AccountId))
-                    </th>
-                    <th @onclick="() => SortBy(nameof(Transaction.Amount))">
-                        Amount @GetSortIndicator(nameof(Transaction.Amount))
-                    </th>
-                    <th @onclick="() => SortBy(nameof(Transaction.TransferReciver))">
-                        Transfer Reciver @GetSortIndicator(nameof(Transaction.TransferReciver))
-                    </th>
-                    <th @onclick="() => SortBy(nameof(Transaction.BalanceAfterTransaction))">
-                        Balance @GetSortIndicator(nameof(Transaction.BalanceAfterTransaction))
-                    </th>
-                    <th @onclick="() => SortBy(nameof(Transaction.Date))">
-                        Last Updated @GetSortIndicator(nameof(Transaction.Date))
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var trans in _transactionsRows)
-                {
-                    <tr>
-                        <td>@tx.FromName</td>
-                        <td>@account.Currency</td>
-						<td>@account.Deposit</td>  
-                        <td style="text-align:right">@($"{account.Balance:N2}")</td>
-                        <td>@account.LastUpdated.ToString("g")</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
-    else
-    {
-        <h3>You dont have any tranfer.</h3>
-    }
-
-</ul>
+            }
+        </tbody>
+    </table>
+}
 
 @code {
     private List<BankAccount> _accounts = new();
-    private string? _currentSortColumn;
-    private bool _sortAscending = true;
-    private List<BankAccount> accounts = new();
-
-    //nytt
-    private List<TransactionRow> _transactionsRows = new();
-    //nytt
-    private class TransactionRow
-    {
-        public NyTransaktion nyTransaktion { get; set; } = null!;
-        public string FromName { get; set; } = string.Empty;
-        public string ToName { get; set; } = string.Empty;
-        public DateTime Date { get; set; }
-    }
-
-    //sätt in logik för att hämta transaktionshistorik per konto
+    private List<Transaction>? _transactions = new();
+    private readonly FilterModel _filterModel = new();
 
     protected override async Task OnInitializedAsync()
     {
-        _accounts = await AccountService.GetAccounts();
-
-        //nytt
-        var accountById = _accounts.ToDictionary(a => a.Id, a => a.Name);
-
-        _transactionsRows = _accounts
-        .SelectMany(acc => acc.NyTransaktion.Select(tx => new TransactionRow
-        {
-            nyTransaktion = tx,
-            FromName = tx.FromAccount.HasValue && accountById.TryGetValue(tx.FromAccount.Value, out var fn) ? fn : string.Empty,
-            ToName = tx.ToAccount.HasValue && accountById.TryGetValue(tx.ToAccount.Value, out var tn) ? tn : string.Empty,
-        }))
-        .OrderByDescending(tr => tr.nyTransaktion.Date)
-		.ToList();
-
+        var accounts = await AccountService.GetAccounts();
+        _accounts = accounts.Cast<BankAccount>().ToList();
+        _transactions = new();
     }
-    private void SortBy(string? columnName) // SortBy metod för att sortera kolumnerna
+
+    private void ApplyFilters()
     {
-        if (string.IsNullOrEmpty(columnName))
+        if (_filterModel.SelectedAccountId == Guid.Empty)
+        {
+            _transactions = new();
+            StateHasChanged();
             return;
-
-        if (_currentSortColumn == columnName)
-            _sortAscending = !_sortAscending; // toggle ascending/descending
-        else
-        {
-            _currentSortColumn = columnName;
-            _sortAscending = true;
         }
 
-        _accounts = columnName switch
+        var selectedAccount = _accounts.FirstOrDefault(a => a.Id == _filterModel.SelectedAccountId);
+        if (selectedAccount == null)
         {
-            nameof(BankAccount.Name) => _sortAscending
-                ? _accounts.OrderBy(a => a.Name).ToList()
-                : _accounts.OrderByDescending(a => a.Name).ToList(),
+            _transactions = new();
+            StateHasChanged();
+            return;
+        }
 
-            nameof(BankAccount.AccountType) => _sortAscending
-                ? _accounts.OrderBy(a => a.AccountType).ToList()
-                : _accounts.OrderByDescending(a => a.AccountType).ToList(),
+        IEnumerable<Transaction> query = selectedAccount.Transactions;
 
-            nameof(BankAccount.Currency) => _sortAscending
-                ? _accounts.OrderBy(a => a.Currency).ToList()
-                : _accounts.OrderByDescending(a => a.Currency).ToList(),
+        var fromDate = _filterModel.FromDate?.Date;
+        var toDateExclusive = _filterModel.ToDate?.Date.AddDays(1);
 
-            nameof(BankAccount.Balance) => _sortAscending
-                ? _accounts.OrderBy(a => a.Balance).ToList()
-                : _accounts.OrderByDescending(a => a.Balance).ToList(),
+        if (fromDate.HasValue)
+            query = query.Where(t => t.Timestamp >= fromDate.Value);
 
-            nameof(BankAccount.LastUpdated) => _sortAscending
-                ? _accounts.OrderBy(a => a.LastUpdated).ToList()
-                : _accounts.OrderByDescending(a => a.LastUpdated).ToList(),
+        if (toDateExclusive.HasValue)
+            query = query.Where(t => t.Timestamp < toDateExclusive.Value);
 
-            _ => _accounts
+        if (_filterModel.TransactionType.HasValue)
+            query = query.Where(t => t.Type == _filterModel.TransactionType.Value);
+
+        if (_filterModel.MinAmount.HasValue)
+            query = query.Where(t => t.Amount >= _filterModel.MinAmount.Value);
+
+        if (_filterModel.MaxAmount.HasValue)
+            query = query.Where(t => t.Amount <= _filterModel.MaxAmount.Value);
+
+        query = _filterModel.SortOption switch
+        {
+            "date_asc" => query.OrderBy(t => t.Timestamp),
+            "amount_asc" => query.OrderBy(t => t.Amount),
+            "amount_desc" => query.OrderByDescending(t => t.Amount),
+            "type" => query.OrderBy(t => t.Type),
+            _ => query.OrderByDescending(t => t.Timestamp)
         };
+
+        _transactions = query.ToList();
+        StateHasChanged();
     }
 
-    private string GetSortIndicator(string columnName) //GetSortIndicator metod för att visa uppåt- eller nedåtpil beroende på sorteringsordning (Ändra namnen?)
+    private void ResetFilters()
     {
-        if (_currentSortColumn != columnName)
-            return string.Empty;
-
-        return _sortAscending ? "▲" : "▼";
+        _filterModel.TransactionType = null;
+        _filterModel.FromDate = null;
+        _filterModel.ToDate = null;
+        _filterModel.MinAmount = null;
+        _filterModel.MaxAmount = null;
+        _filterModel.SortOption = "date_desc";
+        ApplyFilters();
     }
 
-    private async Task GetAccountAsync()
+    private string GetAccountName(Guid id)
+        => _accounts.FirstOrDefault(a => a.Id == id)?.Name ?? "Unknown";
+
+    private static string GetTransactionRowClass(TransactionType type) => type switch
     {
-        try
-        {
-            _accounts = await AccountService.GetAccounts();
-        }
-        catch (Exception exception)
-        {
-            Console.WriteLine("You are missing input");
-            throw;
-        }
-    }
+        TransactionType.Deposit => "deposit-row",
+        TransactionType.Withdrawal => "withdrawal-row",
+        TransactionType.Transfer => "transfer-row",
+        _ => string.Empty
+    };
 
-    private async Task DeleteAccountAsync(IBankAccount accountId)
+    private class FilterModel
     {
-        try
-        {
-            await AccountService.DeleteAccount(accountId);
-            await GetAccountAsync();
-        }
-        catch (Exception exception)
-        {
-            Console.WriteLine("Could not delete account");
-            throw;
-        }
+        public Guid SelectedAccountId { get; set; } = Guid.Empty;
+        public TransactionType? TransactionType { get; set; }
+        public DateTime? FromDate { get; set; }
+        public DateTime? ToDate { get; set; }
+        public decimal? MinAmount { get; set; }
+        public decimal? MaxAmount { get; set; }
+        public string SortOption { get; set; } = "date_desc";
     }
-    //Transaktionspost skapas på båda konton
-    //Transaktionshistorik ska visa datum, typ (insättning/uttag/överföring), belopp och saldo efter transaktion
-    //Filtrering av historik per datumintervall och typ
-    //Sortering av historik efter datum och belopp
-    //Transaktionshistorik per konto (datum, typ, belopp, saldo efter)
-    //Enkel sortering av historik (datum, belopp)
 }
-
+ *@
 

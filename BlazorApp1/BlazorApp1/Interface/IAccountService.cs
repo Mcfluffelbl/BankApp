@@ -7,5 +7,7 @@ public interface IAccountService
     Task UpdateAccounts(List<IBankAccount> updatedAccounts);
     
     void Transfer(Guid fromAccountId, Guid toAccountId, decimal amount);
+    void Deposit(Guid toAccountId, decimal amount);
+    void Withdraw(Guid fromAccountId, decimal amount);
 }
 

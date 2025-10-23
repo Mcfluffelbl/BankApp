@@ -73,5 +73,25 @@
             fromAccount.Transfer(toAccount, amount);
             //SaveAsync().Wait();
         }
+
+        public void Deposit(Guid toAccountId, decimal amount)
+        {
+            var toAccount = _accounts.FirstOrDefault(a => a.Id == toAccountId);
+            if (toAccount == null)
+                throw new ArgumentException("Account not found");
+
+            toAccount.Deposit(amount);
+            _storageService.SetItemAsync(StorageKey, _accounts);
+        }
+
+        public void Withdraw(Guid fromAccountId, decimal amount)
+        {
+            var fromAccount = _accounts.FirstOrDefault(a => a.Id == fromAccountId);
+            if (fromAccount == null)
+                throw new ArgumentException("Account not found");
+
+            fromAccount.Withdraw(amount);
+            _storageService.SetItemAsync(StorageKey, _accounts);
+        }
     }
 }
