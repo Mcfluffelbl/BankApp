@@ -64,6 +64,7 @@
 
         public void Transfer(Guid fromAccountId, Guid toAccountId, decimal amount)
         {
+            var fromStorage = _storageService.GetItemAsync<List<BankAccount>>(StorageKey);
             var fromAccount = _accounts.FirstOrDefault(a => a.Id == fromAccountId);
             var toAccount = _accounts.FirstOrDefault(a => a.Id == toAccountId);
             if (fromAccount == null)
@@ -71,27 +72,32 @@
             if (toAccount == null)
                 throw new ArgumentException("To account not found");
             fromAccount.Transfer(toAccount, amount);
-            //SaveAsync().Wait();
+            _storageService.SetItemAsync(StorageKey, _accounts);
+       
         }
 
         public void Deposit(Guid toAccountId, decimal amount)
         {
+            var fromStorage = _storageService.GetItemAsync<List<BankAccount>>(StorageKey);
             var toAccount = _accounts.FirstOrDefault(a => a.Id == toAccountId);
             if (toAccount == null)
                 throw new ArgumentException("Account not found");
 
             toAccount.Deposit(amount);
-            //await _storageService.SetItemAsync(StorageKey, _accounts);
+            _storageService.SetItemAsync(StorageKey, _accounts);
+           
         }
 
         public void Withdraw(Guid fromAccountId, decimal amount)
         {
+            var fromStorage = _storageService.GetItemAsync<List<BankAccount>>(StorageKey);
             var fromAccount = _accounts.FirstOrDefault(a => a.Id == fromAccountId);
             if (fromAccount == null)
                 throw new ArgumentException("Account not found");
 
             fromAccount.Withdraw(amount);
-            //_storageService.SetItemAsync(StorageKey, _accounts);
+            _storageService.SetItemAsync(StorageKey, _accounts);
+            
         }
     }
 }

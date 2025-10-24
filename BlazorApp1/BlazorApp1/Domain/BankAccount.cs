@@ -10,9 +10,11 @@ namespace BlazorApp1.Domain
         public string Currency { get; set; }
         public decimal Balance { get; set; }
         public DateTime LastUpdated { get; set; }
+
         private readonly List<Transaction> _transactions = new();
 
         public IReadOnlyList<Transaction> Transactions => _transactions;
+
 
         public BankAccount(string name, AccountType accountType, string currency, decimal initialBalance)
         {

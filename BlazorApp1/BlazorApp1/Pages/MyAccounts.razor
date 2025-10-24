@@ -56,6 +56,7 @@
     protected override async Task OnInitializedAsync()
     {
         _accounts = await AccountService.GetAccounts();
+
     }
     private void SortBy(string? columnName) // SortBy metod för att sortera kolumnerna
     {
