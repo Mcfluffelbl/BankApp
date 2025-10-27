@@ -31,7 +31,7 @@
         public async Task<BankAccount> CreateAccount(string name, AccountType accountType, string currency, decimal initialBalance) //Liknande transaktion?
         {
             await IsInitialized();
-            var account = new BankAccount(Guid.NewGuid(), name, accountType, currency, initialBalance);
+            var account = new BankAccount(name, accountType, currency, initialBalance);
             _accounts.Add(account);
             await SaveAsync();
             return account;

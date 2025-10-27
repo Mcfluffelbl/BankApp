@@ -75,6 +75,7 @@ else
 @code {
     // Instance variable
     private List<BankAccount> _accounts;
+    private List<Transaction> _transactions = new ();
     private BankAccount? _selectedAccount;
     private Guid _selectedAccountId;
 
@@ -128,7 +129,9 @@ else
     /// <returns></returns>
     protected override async Task OnInitializedAsync()
     {
-        _accounts = await AccountService.GetAccounts();
+        var accounts = await AccountService.GetAccounts();
+        _accounts = accounts.Cast<BankAccount>().ToList();
+        _transactions = new();
 
         if (_accounts.Count > 0)
         {
@@ -141,7 +144,9 @@ else
     private IEnumerable<Transaction> sortedTransaction()
     {
         if (_selectedAccount == null)
+        {
             return Enumerable.Empty<Transaction>();
+        }
 
         // Sort list, Date and amount
         var sortedList = _selectedAccount.Transactions.AsEnumerable();

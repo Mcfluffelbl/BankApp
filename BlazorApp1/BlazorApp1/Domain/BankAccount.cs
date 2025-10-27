@@ -15,9 +15,8 @@ namespace BlazorApp1.Domain
         public decimal Balance { get; set; }
         public DateTime LastUpdated { get; set; }
 
-        private readonly List<Transaction> _transactions = new();
+        public List<Transaction> Transactions { get; private set; } = new();
 
-        public IReadOnlyList<Transaction> Transactions => _transactions;
 
         // Constructor
         public BankAccount(string name, AccountType accountType, string currency, decimal initialBalance)
@@ -29,7 +28,7 @@ namespace BlazorApp1.Domain
             LastUpdated = DateTime.Now;
         }
         [JsonConstructor]
-        public BankAccount(Guid id, string name, AccountType accountType, string currency, decimal balance)
+        public BankAccount(Guid id, string name, AccountType accountType, string currency, decimal balance, List<Transaction> transactions)
         {
             Id = id;
             Name = name;
@@ -37,6 +36,7 @@ namespace BlazorApp1.Domain
             Currency = currency;
             Balance = balance;
             LastUpdated = DateTime.Now;
+            Transactions = transactions ?? new List<Transaction>(); 
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace BlazorApp1.Domain
             // Deposit to account
             Balance += amount;
             LastUpdated = DateTime.Now;
-            _transactions.Add(new Transaction
+            Transactions.Add(new Transaction
             {
                 Amount = amount,
                 TransactionType = TransactionType.Deposit,
@@ -80,7 +80,7 @@ namespace BlazorApp1.Domain
             // Withdraw from account
             Balance -= amount;
             LastUpdated = DateTime.Now;
-            _transactions.Add(new Transaction
+            Transactions.Add(new Transaction
             {
                 Amount = -amount, // Negativt belopp vid uttag
                 TransactionType = TransactionType.Withdrawal,
@@ -108,7 +108,7 @@ namespace BlazorApp1.Domain
             // From account
             Balance -= amount;
             LastUpdated = DateTime.Now;
-            _transactions.Add(new Transaction
+            Transactions.Add(new Transaction
             {
                 Amount = -amount, // Negativt belopp för utgående transfer
                 TransactionType = TransactionType.Transfer,
@@ -121,7 +121,7 @@ namespace BlazorApp1.Domain
             // To account
             to.Balance += amount;
             to.LastUpdated = DateTime.Now;
-            to._transactions.Add(new Transaction
+            to.Transactions.Add(new Transaction
             {
                 Amount = amount,
                 TransactionType = TransactionType.Transfer,
