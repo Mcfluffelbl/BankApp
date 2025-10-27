@@ -1,9 +1,147 @@
 ﻿@page "/NewTransaktion"
 @using BlazorApp1.Domain
 @inject IAccountService AccountService
+@inject NavigationManager NavigationManager
 
-<h1>New Transaction</h1>
+<!-- Back Button -->
+<div style="margin-bottom: 10px; top: 80px; z-index: 1000;">
+    <button class="btn back-btn" style="background-color: lightgray; padding: 5px 10px;" @onclick="GoBack">
+        ← Back
+    </button>
+</div>
 
+<h1 style="text-align: center;">New Transaction</h1>
+
+<hr />
+
+<style>
+    <!-- Custom back button -->
+    back-btn {
+        background-color: transparent;
+        border: none;
+        color: #0b5c5a;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+    .back-btn:hover {
+        color: coral;
+    }
+
+    <!-- Custom Box for amount -->
+    .amount-card {
+        background-color: #0b5c5a; /* samma gröna ton som bilden */
+        color: white;
+        border-radius: 10px;
+        padding: 30px;
+        text-align: center;
+        width: 300px;
+        margin: 20px auto;
+    }
+    .amount-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    .amount-subtitle {
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+        opacity: 0.9;
+    }
+    .amount-input-wrapper {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    .amount-input {
+        background: transparent;
+        border: none;
+        color: white;
+        font-size: 2.5rem;
+        font-weight: bold;
+        text-align: right;
+        width: 200px;
+        outline: none;
+    }
+    .amount-input:focus {
+        outline: none;
+    }
+    .amount-currency {
+        font-size: 2.5rem;
+        margin-left: 5px;
+    }
+
+    <!-- Custom Box for account -->
+    .account-card {
+        background-color: #0b5c5a;
+        color: white;
+        border-radius: 10px;
+        padding: 25px;
+        margin: 20px auto;
+        text-align: center;
+        width: 300px;
+    }
+    .account-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    .account-subtitle {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-bottom: 15px;
+    }
+    .account-select {
+        background-color: white;
+        color: #0b5c5a;
+        border: none;
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 1rem;
+        width: 100%;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .account-select:hover {
+        background-color: #e0f2f1;
+    }
+    .account-select:disabled {
+        background-color: #d9d9d9;
+        color: #777;
+        cursor: not-allowed;
+    }
+
+    <!-- Custom Button -->
+    .my-custom-btn {
+        background-color: #FFD0DD;
+        color: aliceblue;
+        border: none;
+        transform: scale(2);
+        transition: background-color 0.3s ease, transform 0.1s ease;
+    }
+    .my-custom-btn:hover {
+        background-color: #0b5c5f;
+        transform: scale(2.3);
+    }
+    .my-custom-btn:active {
+        background-color: darkslategray;
+        transform: scale(1.90);
+    }
+    .my-custom-btn:disabled {
+        background-color: lightgray;
+        color: darkgray;
+        cursor: not-allowed;
+    }
+    th {
+        cursor: pointer;
+        background-color: #f8f9fa;
+        user-select: none;
+    }
+    th:hover {
+        background-color: #e9ecef;
+    }
+</style>
 @if (_accounts.Count < 1)
 {
     <!-- If less than one account show errror -->
@@ -16,7 +154,7 @@ else
         <ValidationSummary />
 
         <!-- Transaction Type -->
-        <div class="mb-2">
+        <div class="account-card">
             <label>Transaction Type</label>
             <InputSelect @bind-Value="_model.TransactionType" class="form-select">
                 @foreach (var type in Enum.GetValues(typeof(TransactionType))
@@ -32,11 +170,12 @@ else
         @if (_model.TransactionType == TransactionType.Transfer)
         {
             <!-- From acount -->
-            <div class="mb-2">
-                <label>From Account</label>
+            <div class="account-card">
+                <div class="account-title">From Account</div>
+                <div class="account-subtitle">Select the account to send from</div>
                 <InputSelect TValue="Guid"
                              @bind-Value="_model.FromAccountId"
-                             class="form-select"
+                             class="account-select"
                              @onchange="HandleFormChanged">
                     <option value="@Guid.Empty">-- Select an account --</option>
                     @foreach (var account in _accounts)
@@ -45,13 +184,13 @@ else
                     }
                 </InputSelect>
             </div>
-
-            <!-- To Account -->
-            <div class="mb-2">
-                <label>To Account</label>
+            <!-- From acount -->
+            <div class="account-card">
+                <div class="account-title">To Account</div>
+                <div class="account-subtitle">Select the account to receive funds</div>
                 <InputSelect TValue="Guid"
                              @bind-Value="_model.ToAccountId"
-                             class="form-select"
+                             class="account-select"
                              disabled="@(_model.FromAccountId == Guid.Empty)">
                     <option value="@Guid.Empty">Choose account</option>
                     @foreach (var account in _toAccounts)
@@ -64,7 +203,7 @@ else
         else
         {
             <!-- If not transfer, show just one account option -->
-            <div class="mb-2">
+            <div class="account-card">
                 <label>Account</label>
                 <InputSelect TValue="Guid"
                              @bind-Value="_model.FromAccountId"
@@ -79,9 +218,13 @@ else
         }
 
         <!-- Transaction amount -->
-        <div class="mb-2">
-            <label>Amount</label>
-            <InputNumber TValue="decimal" @bind-Value="_model.Amount" class="form-control"></InputNumber>
+        <div class="amount-card">
+            <div class="amount-title">Set Amount</div>
+            <div class="amount-subtitle">What Amount?</div>
+            <div class="amount-input-wrapper">
+                <InputNumber TValue="decimal" @bind-Value="_model.Amount" class="amount-input" />
+                <span class="amount-currency">$</span>
+            </div>
         </div>
         @if (!string.IsNullOrEmpty(_errorMessage))
         {
@@ -89,10 +232,14 @@ else
                 @_errorMessage
             </div>
         }
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <div style="text-align: center;">
+            <button type="submit" class="btn my-custom-btn" style="margin-top: 20px; margin-bottom: 20px;">Submit</button>
+        </div>
     </EditForm>
 
-    <h4>Accounts</h4>
+    <hr />
+
+    <h4 style="text-align: center;">Accounts</h4>
     <ul>
         <!-- Show accounts list -->
         @foreach (var account in _accounts)
@@ -183,5 +330,11 @@ else
             ? _accounts.Where(a => a.Id != from.Id).ToList()
             : _accounts.ToList();
         _model.ToAccountId = Guid.Empty;
+    }
+
+    // 🡨 Back navigation
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/"); // <-- change this to your desired route
     }
 }
