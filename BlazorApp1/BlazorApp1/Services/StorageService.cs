@@ -24,7 +24,9 @@ namespace BlazorApp1.Services
         {
             var json = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", key);
             if (string.IsNullOrEmpty(json))
+            {
                 return default;
+            }
             return JsonSerializer.Deserialize<T>(json, _jsonSerializerOptions)!;
         }
     }

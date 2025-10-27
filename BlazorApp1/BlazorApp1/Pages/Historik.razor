@@ -4,7 +4,7 @@
 @using BlazorApp1.Interface
 @inject IAccountService AccountService
 
-
+<!-- -->
 <h1>History</h1>
 
 @if (_accounts.Count == 0)
@@ -13,6 +13,7 @@
 }
 else
 {
+    {/* */}
     <div class="mb-2">
         <InputSelect TValue="Guid"
             class="form-select"
@@ -72,21 +73,26 @@ else
 }
 
 @code {
+    // Instance variable
     private List<BankAccount> _accounts;
     private BankAccount? _selectedAccount;
     private Guid _selectedAccountId;
 
-    //Startvärde för sorteringen
+    //Startamount for sorting
     private SortKey currentKey = SortKey.Date;
     private bool descending = true;
 
-    //Sorteringsvariant
+    //Sorting variant
     private enum SortKey
     {
         Date,
         Amount
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="sortkey"></param>
     private void SetSort(SortKey sortkey)
     {
         if(currentKey == sortkey)
@@ -100,6 +106,9 @@ else
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     private Guid SelectedAccountId
     {
         get => _selectedAccountId;
@@ -113,6 +122,10 @@ else
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     protected override async Task OnInitializedAsync()
     {
         _accounts = await AccountService.GetAccounts();
@@ -124,12 +137,13 @@ else
         }
     }
 
+    // 
     private IEnumerable<Transaction> sortedTransaction()
     {
         if (_selectedAccount == null)
             return Enumerable.Empty<Transaction>();
 
-        //Sortera lista, Datum och belopp
+        // Sort list, Date and amount
         var sortedList = _selectedAccount.Transactions.AsEnumerable();
         sortedList = currentKey switch
         {

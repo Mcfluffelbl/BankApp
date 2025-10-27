@@ -43,6 +43,11 @@
             return _accounts.Cast<BankAccount>().ToList();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="account"></param>
+        /// <returns></returns>
         public async Task DeleteAccount(BankAccount account)
         {
             await IsInitialized();

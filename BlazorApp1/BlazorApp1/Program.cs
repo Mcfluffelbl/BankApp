@@ -10,6 +10,8 @@ namespace BlazorApp1
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("#app");
             builder.RootComponents.Add<HeadOutlet>("head::after");
+
+            // Register service for DI
             builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddScoped<IStorageService, StorageService>();
 
