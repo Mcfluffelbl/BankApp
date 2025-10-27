@@ -1,4 +1,4 @@
-﻿@page "/NyTransaktion"
+﻿@page "/NewTransaktion"
 @using BlazorApp1.Domain
 @inject IAccountService AccountService
 
@@ -111,7 +111,7 @@ else
         public TransactionType TransactionType { get; set; } = TransactionType.Transfer;
     }
 
-    // 
+    // On Start ----
     protected override async void OnInitialized()
     {
         _accounts = await AccountService.GetAccounts();
@@ -151,6 +151,10 @@ else
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="eventArgs"></param>
     private void HandleFormChanged(ChangeEventArgs eventArgs)
     {
         if (Guid.TryParse(eventArgs.Value?.ToString(), out var id))
@@ -159,6 +163,10 @@ else
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="fromId"></param>
     private void OnFormChanged(Guid fromId)
     {
         _model.FromAccountId = fromId;

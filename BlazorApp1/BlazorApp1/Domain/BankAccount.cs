@@ -1,9 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
 namespace BlazorApp1.Domain
-    /// <summary>
-    /// 
-    /// </summary>
 {
     public class BankAccount : IBankAccount
     {
@@ -14,9 +11,7 @@ namespace BlazorApp1.Domain
         public string Currency { get; set; }
         public decimal Balance { get; set; }
         public DateTime LastUpdated { get; set; }
-
         public List<Transaction> Transactions { get; private set; } = new();
-
 
         // Constructor
         public BankAccount(string name, AccountType accountType, string currency, decimal initialBalance)
@@ -40,14 +35,14 @@ namespace BlazorApp1.Domain
         }
 
         /// <summary>
-        /// 
+        /// Deposit a specifik amount to the account balance
         /// </summary>
-        /// <param name="amount"></param>
-        /// <exception cref="ArgumentException"></exception>
+        /// <param name="amount"> The specific amount </param>
+        /// <exception cref="ArgumentException"> An exception if amount is or less than 0 </exception>
         public void Deposit(decimal amount)
         {
             if (amount <= 0)
-                throw new ArgumentException("The Deposit can be 0 or less");
+                throw new ArgumentException("The Deposit can´t be 0 or less");
 
             // Deposit to account
             Balance += amount;
@@ -67,22 +62,25 @@ namespace BlazorApp1.Domain
         /// Withdraw a specifik amount from the account balance
         /// </summary>
         /// <param name="amount">The specific amount</param>
-        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ArgumentException"> An exception if amount is or less than 0 </exception>
         /// <exception cref="InvalidOperationException">An exception if amount is incorrect</exception>
         public void Withdraw(decimal amount)
         {
             if (amount <= 0)
+            {
                 throw new ArgumentException("The amount withdrawn needs to be bigger than 0");
-
+            }
             if (Balance < amount)
+            {
                 throw new InvalidOperationException("Insufficient amount");
-
+            }
+            
             // Withdraw from account
             Balance -= amount;
             LastUpdated = DateTime.Now;
             Transactions.Add(new Transaction
             {
-                Amount = -amount, // Negativt belopp vid uttag
+                Amount = -amount,
                 TransactionType = TransactionType.Withdrawal,
                 Date = DateTime.Now,
                 FromAccount = Id,
@@ -93,10 +91,10 @@ namespace BlazorApp1.Domain
         /// <summary>
         /// Transfer a specific amount from an account to an account
         /// </summary>
-        /// <param name="to"></param>
-        /// <param name="amount"></param>
-        /// <exception cref="ArgumentException"></exception>
-        /// <exception cref="InvalidOperationException"></exception>
+        /// <param name="to"> The account to recive </param>
+        /// <param name="amount"> The specific amount</param>
+        /// <exception cref="ArgumentException"> An exception if amount is or less than 0 </exception>
+        /// <exception cref="InvalidOperationException"> If amount is less than balance trhow Exception </exception>
         public void Transfer(BankAccount to, decimal amount)
         {
             if (amount <= 0)
@@ -110,7 +108,7 @@ namespace BlazorApp1.Domain
             LastUpdated = DateTime.Now;
             Transactions.Add(new Transaction
             {
-                Amount = -amount, // Negativt belopp för utgående transfer
+                Amount = -amount, 
                 TransactionType = TransactionType.Transfer,
                 Date = DateTime.Now,
                 FromAccount = Id,

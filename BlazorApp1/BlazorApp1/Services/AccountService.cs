@@ -59,6 +59,11 @@
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="updatedAccounts"></param>
+        /// <returns></returns>
         public async Task UpdateAccounts(List<BankAccount> updatedAccounts)
         {
             await IsInitialized();
@@ -67,6 +72,13 @@
             await SaveAsync();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fromAccountId"></param>
+        /// <param name="toAccountId"></param>
+        /// <param name="amount"></param>
+        /// <exception cref="ArgumentException"> If Account not found throw exception </exception>
         public void Transfer(Guid fromAccountId, Guid toAccountId, decimal amount)
         {
             var fromStorage = _storageService.GetItemAsync<List<BankAccount>>(StorageKey);
@@ -78,21 +90,33 @@
                 throw new ArgumentException("To account not found");
             fromAccount.Transfer(toAccount, amount);
             _storageService.SetItemAsync(StorageKey, _accounts);
-       
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="toAccountId"></param>
+        /// <param name="amount"></param>
+        /// <exception cref="ArgumentException"> If Account not found throw exception </exception>
         public void Deposit(Guid toAccountId, decimal amount)
         {
             var fromStorage = _storageService.GetItemAsync<List<BankAccount>>(StorageKey);
             var toAccount = _accounts.FirstOrDefault(a => a.Id == toAccountId);
             if (toAccount == null)
+            {
                 throw new ArgumentException("Account not found");
-
+            }
             toAccount.Deposit(amount);
             _storageService.SetItemAsync(StorageKey, _accounts);
            
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fromAccountId"></param>
+        /// <param name="amount"></param>
+        /// <exception cref="ArgumentException"> If Account not found throw exception </exception>
         public void Withdraw(Guid fromAccountId, decimal amount)
         {
             var fromStorage = _storageService.GetItemAsync<List<BankAccount>>(StorageKey);

@@ -4,7 +4,7 @@ namespace BlazorApp1.Domain
 {
     public class Transaction
     {
-        //
+        // Constants
         public Guid Id { get; } = Guid.NewGuid();
         public TransactionType TransactionType { get; set; }
         public decimal Amount { get; set; }
