@@ -25,7 +25,7 @@
         transition: color 0.2s ease;
     }
     .back-btn:hover {
-        color: coral;
+        color: ;
     }
 
     <!-- Custom Box for amount -->
@@ -184,7 +184,7 @@ else
                     }
                 </InputSelect>
             </div>
-            <!-- From acount -->
+            <!-- To acount -->
             <div class="account-card">
                 <div class="account-title">To Account</div>
                 <div class="account-subtitle">Select the account to receive funds</div>
@@ -217,6 +217,15 @@ else
             </div>
         }
 
+        <!-- Lägg till budget/utskriftkategorier -->
+        <div class="account-card">
+            <label>Category</label>
+            <InputSelect TValue="Guid"
+                         class="form-select">
+                <option value="@Guid.Empty">-- Select an category --</option>
+            </InputSelect>
+        </div>
+
         <!-- Transaction amount -->
         <div class="amount-card">
             <div class="amount-title">Set Amount</div>
@@ -226,12 +235,16 @@ else
                 <span class="amount-currency">$</span>
             </div>
         </div>
+
+        <!-- Error Message -->
         @if (!string.IsNullOrEmpty(_errorMessage))
         {
             <div class="alert alert-danger">
                 @_errorMessage
             </div>
         }
+
+        <!-- Submit Button -->
         <div style="text-align: center;">
             <button type="submit" class="btn my-custom-btn" style="margin-top: 20px; margin-bottom: 20px;">Submit</button>
         </div>
@@ -240,6 +253,8 @@ else
     <hr />
 
     <h4 style="text-align: center;">Accounts</h4>
+
+    //Visa hela lista med kategorier
     <ul>
         <!-- Show accounts list -->
         @foreach (var account in _accounts)

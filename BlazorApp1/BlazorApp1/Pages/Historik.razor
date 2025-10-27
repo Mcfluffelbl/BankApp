@@ -4,16 +4,16 @@
 @using BlazorApp1.Interface
 @inject IAccountService AccountService
 
-<!-- -->
 <h1>History</h1>
 
 @if (_accounts.Count == 0)
 {
+    <!-- If no accounts error message -->
     <p>No accounts yet</p>
 }
 else
 {
-    {/* */}
+    <!-- -->
     <div class="mb-2">
         <InputSelect TValue="Guid"
             class="form-select"
@@ -26,6 +26,7 @@ else
         </InputSelect>
     </div>
 
+    <!-- Sort button -->
     <div class="mb-2">
         <button class="btn btn-sm" @onclick="() => SetSort(SortKey.Date)">
             SortBy: Date @(currentKey == SortKey.Date ? (descending ? "▲" : "▼") : "")
