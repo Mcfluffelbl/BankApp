@@ -13,7 +13,7 @@
 }
 else
 {
-    <!-- -->
+    <!-- If Accounts Show a dropp down list of all accounts -->
     <div class="mb-2">
         <InputSelect TValue="Guid"
             class="form-select"
@@ -38,10 +38,12 @@ else
 
     @if (!_selectedAccount.Transactions.Any())
     {
+        <!-- If no transaktions error message -->
         <p>No Transactions yet!</p>
     }
     else
     {
+        <!-- If Accounts Show a list of all accounts -->
         <table class="table table-sm">
             <thead>
                 <tr>

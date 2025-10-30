@@ -8,7 +8,6 @@ public interface IAccountService
     Task<List<BankAccount>> GetAccounts();
     Task DeleteAccount(BankAccount account);
     Task UpdateAccounts(List<BankAccount> updatedAccounts);
-    
     void Transfer(Guid fromAccountId, Guid toAccountId, decimal amount);
     void Deposit(Guid toAccountId, decimal amount);
     void Withdraw(Guid fromAccountId, decimal amount);

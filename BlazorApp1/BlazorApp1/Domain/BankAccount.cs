@@ -42,7 +42,10 @@ namespace BlazorApp1.Domain
         public void Deposit(decimal amount)
         {
             if (amount <= 0)
+            {
+                Console.WriteLine("The amount needs to be bigger than 0 to deposit");
                 throw new ArgumentException("The Deposit can´t be 0 or less");
+            }
 
             // Deposit to account
             Balance += amount;
@@ -56,6 +59,7 @@ namespace BlazorApp1.Domain
                 ToAccount = null,
                 BalanceAfterTransaction = Balance
             });
+            Console.WriteLine($"Depisited to {Id} = {amount} from {Balance}. ");
         }
 
         /// <summary>
@@ -68,10 +72,12 @@ namespace BlazorApp1.Domain
         {
             if (amount <= 0)
             {
+                Console.WriteLine("The amount needs to be bigger than 0 to withdraw");
                 throw new ArgumentException("The amount withdrawn needs to be bigger than 0");
             }
             if (Balance < amount)
             {
+                Console.WriteLine("Insufficient amount to withdraw, it needs to be less than current balance");
                 throw new InvalidOperationException("Insufficient amount");
             }
             
@@ -86,6 +92,7 @@ namespace BlazorApp1.Domain
                 FromAccount = Id,
                 BalanceAfterTransaction = Balance
             });
+            Console.WriteLine($"Withdrawn from {Id} = {amount} from {Balance}. ");
         }
 
         /// <summary>
@@ -97,12 +104,20 @@ namespace BlazorApp1.Domain
         /// <exception cref="InvalidOperationException"> If amount is less than balance trhow Exception </exception>
         public void Transfer(BankAccount to, decimal amount)
         {
+            // Amount given is or less than 0 give exception
             if (amount <= 0)
+            {
+                Console.WriteLine("The amount needs to be bigger than 0 to transfer");
                 throw new ArgumentException("The amount transferred needs to be bigger than 0");
-
+            }
+            
+            // If balance is less than the amount throw exception
             if (Balance < amount)
+            {
+                Console.WriteLine("Insufficient amount to transfer, it needs to be less than current balance");
                 throw new InvalidOperationException("Insufficient amount");
-
+            }
+             
             // From account
             Balance -= amount;
             LastUpdated = DateTime.Now;
@@ -128,6 +143,7 @@ namespace BlazorApp1.Domain
                 ToAccount = to.Id,
                 BalanceAfterTransaction = to.Balance
             });
+            Console.WriteLine($"Transfer {amount} from {Id} to {to.Id}");
         }
     }
 }
