@@ -15,14 +15,16 @@
         private async Task IsInitialized()
         {
             if (isLoaded)
+            {
                 return;
-
+            }
             var fromStorage = await _storageService.GetItemAsync<List<BankAccount>>(StorageKey);
             _accounts.Clear();
 
             if (fromStorage is { Count: > 0 })
+            {
                 _accounts.AddRange(fromStorage);
-
+            }
             isLoaded = true;
         }
 
@@ -54,6 +56,7 @@
             var accountToRemove = _accounts.FirstOrDefault(a => a.Id == account.Id);
             if (accountToRemove != null)
             {
+                Console.WriteLine("");
                 _accounts.Remove(accountToRemove);
                 await SaveAsync();
             }
@@ -85,12 +88,17 @@
             var fromAccount = _accounts.FirstOrDefault(a => a.Id == fromAccountId);
             var toAccount = _accounts.FirstOrDefault(a => a.Id == toAccountId);
             if (fromAccount == null)
+            {
+                Console.WriteLine("");
                 throw new ArgumentException("From account not found");
+            }
             if (toAccount == null)
+            {
+                Console.WriteLine("");
                 throw new ArgumentException("To account not found");
+            }
             fromAccount.Transfer(toAccount, amount);
             _storageService.SetItemAsync(StorageKey, _accounts);
-
         }
 
         /// <summary>
@@ -105,11 +113,11 @@
             var toAccount = _accounts.FirstOrDefault(a => a.Id == toAccountId);
             if (toAccount == null)
             {
+                Console.WriteLine("");
                 throw new ArgumentException("Account not found");
             }
             toAccount.Deposit(amount);
             _storageService.SetItemAsync(StorageKey, _accounts);
-           
         }
 
         /// <summary>
@@ -123,11 +131,12 @@
             var fromStorage = _storageService.GetItemAsync<List<BankAccount>>(StorageKey);
             var fromAccount = _accounts.FirstOrDefault(a => a.Id == fromAccountId);
             if (fromAccount == null)
+            {
+                Console.WriteLine("Account wasent found");
                 throw new ArgumentException("Account not found");
-
+            }
             fromAccount.Withdraw(amount);
             _storageService.SetItemAsync(StorageKey, _accounts);
-            
         }
     }
 }

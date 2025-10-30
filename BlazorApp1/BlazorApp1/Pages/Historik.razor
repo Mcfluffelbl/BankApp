@@ -8,12 +8,12 @@
 
 @if (_accounts.Count == 0)
 {
-    <!-- If no accounts error message -->
+    @* If no accounts error message *@
     <p>No accounts yet</p>
 }
 else
 {
-    <!-- If Accounts Show a dropp down list of all accounts -->
+    @* If Accounts Show a dropp down list of all accounts *@
     <div class="mb-2">
         <InputSelect TValue="Guid"
             class="form-select"
@@ -26,24 +26,53 @@ else
         </InputSelect>
     </div>
 
-    <!-- Sort button -->
+    @* Sort button *@
     <div class="mb-2">
         <button class="btn btn-sm" @onclick="() => SetSort(SortKey.Date)">
             SortBy: Date @(currentKey == SortKey.Date ? (descending ? "▲" : "▼") : "")
         </button>
-        <button class="btn btn-sm" @onclick="() => SetSort(SortKey.Date)">
+        <button class="btn btn-sm" @onclick="() => SetSort(SortKey.Amount)">
             SortBy: Amount @(currentKey == SortKey.Amount ? (descending ? "▲" : "▼") : "")
         </button>
     </div>
 
+    @* Filter options *@
+    <div class="mb-2">
+        <label for="typeFilter">Filter by Type:</label>
+        <InputSelect TValue="TransactionType?" class="form-select" id="typeFilter" @bind-Value="selectedTransactionType">
+            <option value="">All</option>
+            @foreach (var type in Enum.GetValues<TransactionType>())
+            {
+                <option value="@type">@GetTransactionTypeText(type)</option>
+            }
+        </InputSelect>
+    </div>
+
+    @* Dateinterval-filter *@
+    <div class="mb-2 d-flex gap-3">
+        <div>
+            <label for="fromDate">From date:</label>
+            <InputDate TValue="DateTime?" class="form-control" id="fromDate" @bind-Value="fromDate" />
+        </div>
+        <div>
+            <label for="toDate">To date:</label>
+            <InputDate TValue="DateTime?" class="form-control" id="toDate" @bind-Value="toDate" />
+        </div>
+    </div>
+
+    <div class="mb-2">
+        <button class="btn btn-sm btn-primary" @onclick="ApplyFilters">Apply Filter</button>
+        <button class="btn btn-sm btn-secondary" @onclick="ClearFilter">Clear Filter</button>
+    </div>
+
     @if (!_selectedAccount.Transactions.Any())
     {
-        <!-- If no transaktions error message -->
+        @* If no transaktions error message *@
         <p>No Transactions yet!</p>
     }
     else
     {
-        <!-- If Accounts Show a list of all accounts -->
+        @* If Accounts Show a list of all accounts *@
         <table class="table table-sm">
             <thead>
                 <tr>
@@ -55,12 +84,12 @@ else
                 </tr>
             </thead>
             <tbody>
-                @foreach(var transaction in sortedTransaction())
+                @foreach (var transaction in filteredTransactions.Any() ? filteredTransactions : sortedTransaction())
                 {
                     <tr>
                         <td>@transaction.Date.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
                         <td>@transaction.Amount</td>
-                        <td>@transaction.TransactionType</td>
+                        <td>@GetTransactionTypeText(transaction.TransactionType)</td>
                         <td>@transaction.BalanceAfterTransaction</td>
                         <td>
                             @if (transaction.FromAccount.HasValue || transaction.ToAccount.HasValue)
@@ -81,16 +110,27 @@ else
     private List<Transaction> _transactions = new ();
     private BankAccount? _selectedAccount;
     private Guid _selectedAccountId;
+    private DateTime? fromDate;
+    private DateTime? toDate;
+    private TransactionType? selectedTransactionType;
 
-    //Startamount for sorting
+    //Startamount for sorting and filter
     private SortKey currentKey = SortKey.Date;
     private bool descending = true;
+    private IEnumerable<Transaction> filteredTransactions = new List<Transaction>();
 
     //Sorting variant
     private enum SortKey
     {
         Date,
         Amount
+    }
+
+    //NY Filter variant
+    private enum FilterKey
+    {
+        DateFilter,
+        TypeFilter
     }
 
     /// <summary>
@@ -147,22 +187,70 @@ else
     private IEnumerable<Transaction> sortedTransaction()
     {
         if (_selectedAccount == null)
-        {
             return Enumerable.Empty<Transaction>();
-        }
 
-        // Sort list, Date and amount
-        var sortedList = _selectedAccount.Transactions.AsEnumerable();
-        sortedList = currentKey switch
+        var list = _selectedAccount.Transactions.AsEnumerable();
+
+        // Filter first
+        if (filteredTransactions.Any())
+            list = filteredTransactions;
+
+        // Sort secondly
+        list = currentKey switch
         {
-            SortKey.Amount => (descending
-            ? sortedList.OrderByDescending(t => t.Amount)
-            : sortedList.OrderBy(t => t.Amount)),
-            SortKey.Date => (descending
-                ? sortedList.OrderByDescending(t => t.Date)
-                : sortedList.OrderBy(t => t.Date))
+            SortKey.Amount => descending
+                ? list.OrderByDescending(t => t.Amount)
+                : list.OrderBy(t => t.Amount),
+            SortKey.Date => descending
+                ? list.OrderByDescending(t => t.Date)
+                : list.OrderBy(t => t.Date),
+            _ => list
         };
-        return sortedList;
+
+        return list;
+    }
+
+    // Transaction type
+    private string GetTransactionTypeText(TransactionType type) => type switch
+    {
+        TransactionType.Deposit => "Deposit",
+        TransactionType.Withdrawal => "Withdraw",
+        TransactionType.Transfer => "Transfer",
+        TransactionType.Transferout => "Transfer Out",
+        TransactionType.Transferin => "Transfer In",
+        _ => type.ToString()
+        //Ta bort transfer enum från listan..
+    };
+
+    // Apply the selected filter and remove selected filter
+    private void ApplyFilters()
+    {
+        if (_selectedAccount == null)
+            return;
+
+        var transactions = _selectedAccount.Transactions.AsEnumerable();
+
+        // Datumfilter
+        if (fromDate.HasValue)
+            transactions = transactions.Where(t => t.Date >= fromDate.Value);
+        // Inklude the hole daay
+        if (toDate.HasValue)
+            transactions = transactions.Where(t => t.Date <= toDate.Value.AddDays(1).AddTicks(-1));
+        
+        // Typefilter
+        if (selectedTransactionType.HasValue)
+            transactions = transactions.Where(t => t.TransactionType == selectedTransactionType.Value);
+
+        filteredTransactions = transactions.ToList();
+    }
+
+    // Clear chosen filter
+    private void ClearFilter()
+    {
+        selectedTransactionType = null;
+        fromDate = null;
+        toDate = null;
+        filteredTransactions = new List<Transaction>();
     }
 }
 
