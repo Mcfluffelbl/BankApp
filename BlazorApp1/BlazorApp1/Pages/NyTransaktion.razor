@@ -3,7 +3,7 @@
 @inject IAccountService AccountService
 @inject NavigationManager NavigationManager
 
-@*Back Button*@
+@* Back Button *@
 <div style="margin-bottom: 10px; top: 80px; z-index: 1000;">
     <button class="btn back-btn" style="background-color: lightgray; padding: 5px 10px;" @onclick="GoBack">
         ← Back
@@ -169,7 +169,7 @@ else
         @* Show only feilds if transfer is chosen *@
         @if (_model.TransactionType == TransactionType.Transfer)
         {
-            @*From acount*@ 
+            @* From acount *@ 
             <div class="account-card">
                 <div class="account-title">From Account</div>
                 <div class="account-subtitle">Select the account to send from</div>
@@ -218,7 +218,7 @@ else
             </div>
         }
 
-        @* Lägg till budget/utskriftkategorier *@
+        @* Ny: Lägg till budget/utskriftkategorier *@
         <div class="account-card">
             <label>Category</label>
             <InputSelect TValue="Guid"
@@ -255,7 +255,7 @@ else
 
     <h4 style="text-align: center;">Accounts</h4>
 
-    @* Visa hela lista med kategorier *@
+    @* Show the whole list with accounts *@
     <ul>
         @* Show accounts list *@
         @foreach (var account in _accounts)

@@ -80,10 +80,9 @@ th:hover {
 
 @if (!string.IsNullOrEmpty(_errorMessage))
 {
+    Console.WriteLine("Invalid Account");
     <div class="text-danger">@_errorMessage</div>
 }
-
-@* Sort By *@ 
 @if (_accounts.Any())
 {
     @* Sort by if any accounts *@
@@ -123,9 +122,9 @@ th:hover {
 }
 else
 {
-    <p>Inga konton skapade än.</p>
+    Console.WriteLine("No accounts created yet to put up in the list");
+    <p>No accounts created yet.</p>
 }
-
 @code {
     // Constants
     private CreateAccountModel _model = new();
@@ -175,12 +174,18 @@ else
     private void SortBy(string? columnName) 
     {
         if (string.IsNullOrEmpty(columnName))
+        {
+            Console.WriteLine("The column is empty");
             return;
-
+        }
         if (_currentSortColumn == columnName)
-            _sortAscending = !_sortAscending; 
+        {
+            Console.WriteLine("Sorting Column");
+            _sortAscending = !_sortAscending;
+        }
         else
         {
+            Console.WriteLine("Sorting Column by name");
             _currentSortColumn = columnName;
             _sortAscending = true;
         }
@@ -219,8 +224,9 @@ else
     private string GetSortIndicator(string columnName)
     {
         if (_currentSortColumn != columnName)
+        {
             return string.Empty;
-
+        }
         return _sortAscending ? "▲" : "▼";
     }
 

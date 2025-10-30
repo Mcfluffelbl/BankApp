@@ -45,9 +45,9 @@
     }
     else
     {
+        Console.WriteLine("You dont have any accounts yet");
         <h3>You dont have any accounts yet, go to "Add Account" And add youre first account.</h3>
     }
-    
 </ul>
 
 @code {
@@ -59,7 +59,6 @@
     protected override async Task OnInitializedAsync()
     {
         _accounts = await AccountService.GetAccounts();
-
     }
 
     /// <summary>
@@ -115,8 +114,9 @@
     private string GetSortIndicator(string columnName)
     {
         if (_currentSortColumn != columnName)
+        {
             return string.Empty;
-
+        }
         return _sortAscending ? "▲" : "▼";
     }
 
