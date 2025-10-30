@@ -1,9 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
 namespace BlazorApp1.Domain
-    /// <summary>
-    /// 
-    /// </summary>
 {
     public class BankAccount : IBankAccount
     {
@@ -14,10 +11,7 @@ namespace BlazorApp1.Domain
         public string Currency { get; set; }
         public decimal Balance { get; set; }
         public DateTime LastUpdated { get; set; }
-
-        private readonly List<Transaction> _transactions = new();
-
-        public IReadOnlyList<Transaction> Transactions => _transactions;
+        public List<Transaction> Transactions { get; private set; } = new();
 
         // Constructor
         public BankAccount(string name, AccountType accountType, string currency, decimal initialBalance)
@@ -29,7 +23,7 @@ namespace BlazorApp1.Domain
             LastUpdated = DateTime.Now;
         }
         [JsonConstructor]
-        public BankAccount(Guid id, string name, AccountType accountType, string currency, decimal balance)
+        public BankAccount(Guid id, string name, AccountType accountType, string currency, decimal balance, List<Transaction> transactions)
         {
             Id = id;
             Name = name;
@@ -37,22 +31,26 @@ namespace BlazorApp1.Domain
             Currency = currency;
             Balance = balance;
             LastUpdated = DateTime.Now;
+            Transactions = transactions ?? new List<Transaction>(); 
         }
 
         /// <summary>
-        /// 
+        /// Deposit a specifik amount to the account balance
         /// </summary>
-        /// <param name="amount"></param>
-        /// <exception cref="ArgumentException"></exception>
+        /// <param name="amount"> The specific amount </param>
+        /// <exception cref="ArgumentException"> An exception if amount is or less than 0 </exception>
         public void Deposit(decimal amount)
         {
             if (amount <= 0)
-                throw new ArgumentException("The Deposit can be 0 or less");
+            {
+                Console.WriteLine("The amount needs to be bigger than 0 to deposit");
+                throw new ArgumentException("The Deposit can´t be 0 or less");
+            }
 
             // Deposit to account
             Balance += amount;
             LastUpdated = DateTime.Now;
-            _transactions.Add(new Transaction
+            Transactions.Add(new Transaction
             {
                 Amount = amount,
                 TransactionType = TransactionType.Deposit,
@@ -61,56 +59,71 @@ namespace BlazorApp1.Domain
                 ToAccount = null,
                 BalanceAfterTransaction = Balance
             });
+            Console.WriteLine($"Depisited to {Id} = {amount} from {Balance}. ");
         }
 
         /// <summary>
         /// Withdraw a specifik amount from the account balance
         /// </summary>
         /// <param name="amount">The specific amount</param>
-        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ArgumentException"> An exception if amount is or less than 0 </exception>
         /// <exception cref="InvalidOperationException">An exception if amount is incorrect</exception>
         public void Withdraw(decimal amount)
         {
             if (amount <= 0)
+            {
+                Console.WriteLine("The amount needs to be bigger than 0 to withdraw");
                 throw new ArgumentException("The amount withdrawn needs to be bigger than 0");
-
+            }
             if (Balance < amount)
+            {
+                Console.WriteLine("Insufficient amount to withdraw, it needs to be less than current balance");
                 throw new InvalidOperationException("Insufficient amount");
-
+            }
+            
             // Withdraw from account
             Balance -= amount;
             LastUpdated = DateTime.Now;
-            _transactions.Add(new Transaction
+            Transactions.Add(new Transaction
             {
-                Amount = -amount, // Negativt belopp vid uttag
+                Amount = -amount,
                 TransactionType = TransactionType.Withdrawal,
                 Date = DateTime.Now,
                 FromAccount = Id,
                 BalanceAfterTransaction = Balance
             });
+            Console.WriteLine($"Withdrawn from {Id} = {amount} from {Balance}. ");
         }
 
         /// <summary>
         /// Transfer a specific amount from an account to an account
         /// </summary>
-        /// <param name="to"></param>
-        /// <param name="amount"></param>
-        /// <exception cref="ArgumentException"></exception>
-        /// <exception cref="InvalidOperationException"></exception>
+        /// <param name="to"> The account to recive </param>
+        /// <param name="amount"> The specific amount</param>
+        /// <exception cref="ArgumentException"> An exception if amount is or less than 0 </exception>
+        /// <exception cref="InvalidOperationException"> If amount is less than balance trhow Exception </exception>
         public void Transfer(BankAccount to, decimal amount)
         {
+            // Amount given is or less than 0 give exception
             if (amount <= 0)
+            {
+                Console.WriteLine("The amount needs to be bigger than 0 to transfer");
                 throw new ArgumentException("The amount transferred needs to be bigger than 0");
-
+            }
+            
+            // If balance is less than the amount throw exception
             if (Balance < amount)
+            {
+                Console.WriteLine("Insufficient amount to transfer, it needs to be less than current balance");
                 throw new InvalidOperationException("Insufficient amount");
-
+            }
+             
             // From account
             Balance -= amount;
             LastUpdated = DateTime.Now;
-            _transactions.Add(new Transaction
+            Transactions.Add(new Transaction
             {
-                Amount = -amount, // Negativt belopp för utgående transfer
+                Amount = -amount, 
                 TransactionType = TransactionType.Transfer,
                 Date = DateTime.Now,
                 FromAccount = Id,
@@ -121,7 +134,7 @@ namespace BlazorApp1.Domain
             // To account
             to.Balance += amount;
             to.LastUpdated = DateTime.Now;
-            to._transactions.Add(new Transaction
+            to.Transactions.Add(new Transaction
             {
                 Amount = amount,
                 TransactionType = TransactionType.Transfer,
@@ -130,6 +143,7 @@ namespace BlazorApp1.Domain
                 ToAccount = to.Id,
                 BalanceAfterTransaction = to.Balance
             });
+            Console.WriteLine($"Transfer {amount} from {Id} to {to.Id}");
         }
     }
 }

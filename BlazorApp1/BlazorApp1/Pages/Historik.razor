@@ -4,16 +4,16 @@
 @using BlazorApp1.Interface
 @inject IAccountService AccountService
 
-<!-- -->
 <h1>History</h1>
 
 @if (_accounts.Count == 0)
 {
+    <!-- If no accounts error message -->
     <p>No accounts yet</p>
 }
 else
 {
-    {/* */}
+    <!-- If Accounts Show a dropp down list of all accounts -->
     <div class="mb-2">
         <InputSelect TValue="Guid"
             class="form-select"
@@ -26,6 +26,7 @@ else
         </InputSelect>
     </div>
 
+    <!-- Sort button -->
     <div class="mb-2">
         <button class="btn btn-sm" @onclick="() => SetSort(SortKey.Date)">
             SortBy: Date @(currentKey == SortKey.Date ? (descending ? "▲" : "▼") : "")
@@ -37,10 +38,12 @@ else
 
     @if (!_selectedAccount.Transactions.Any())
     {
+        <!-- If no transaktions error message -->
         <p>No Transactions yet!</p>
     }
     else
     {
+        <!-- If Accounts Show a list of all accounts -->
         <table class="table table-sm">
             <thead>
                 <tr>
@@ -75,6 +78,7 @@ else
 @code {
     // Instance variable
     private List<BankAccount> _accounts;
+    private List<Transaction> _transactions = new ();
     private BankAccount? _selectedAccount;
     private Guid _selectedAccountId;
 
@@ -128,7 +132,9 @@ else
     /// <returns></returns>
     protected override async Task OnInitializedAsync()
     {
-        _accounts = await AccountService.GetAccounts();
+        var accounts = await AccountService.GetAccounts();
+        _accounts = accounts.Cast<BankAccount>().ToList();
+        _transactions = new();
 
         if (_accounts.Count > 0)
         {
@@ -141,7 +147,9 @@ else
     private IEnumerable<Transaction> sortedTransaction()
     {
         if (_selectedAccount == null)
+        {
             return Enumerable.Empty<Transaction>();
+        }
 
         // Sort list, Date and amount
         var sortedList = _selectedAccount.Transactions.AsEnumerable();
