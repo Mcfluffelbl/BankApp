@@ -3,7 +3,7 @@
 @inject IAccountService AccountService
 @inject NavigationManager NavigationManager
 
-<!-- Back Button -->
+@*Back Button*@
 <div style="margin-bottom: 10px; top: 80px; z-index: 1000;">
     <button class="btn back-btn" style="background-color: lightgray; padding: 5px 10px;" @onclick="GoBack">
         ← Back
@@ -15,7 +15,7 @@
 <hr />
 
 <style>
-    <!-- Custom back button -->
+    @* Custom back button *@
     back-btn {
         background-color: transparent;
         border: none;
@@ -28,9 +28,9 @@
         color: ;
     }
 
-    <!-- Custom Box for amount -->
+    @* Custom Box for amount *@
     .amount-card {
-        background-color: #0b5c5a; /* samma gröna ton som bilden */
+        background-color: #0b5c5a;
         color: white;
         border-radius: 10px;
         padding: 30px;
@@ -72,7 +72,7 @@
         margin-left: 5px;
     }
 
-    <!-- Custom Box for account -->
+    @* Custom Box for account *@
     .account-card {
         background-color: #0b5c5a;
         color: white;
@@ -112,7 +112,7 @@
         cursor: not-allowed;
     }
 
-    <!-- Custom Button -->
+    @* Custom Button *@
     .my-custom-btn {
         background-color: #AC8BE8;
         color: aliceblue;
@@ -144,7 +144,7 @@
 </style>
 @if (_accounts.Count < 1)
 {
-    <!-- If less than one account show errror -->
+    @* If less than one account show errror *@
     <p>You need at least one account to make a transaction.</p>
 }
 else
@@ -153,7 +153,7 @@ else
         <DataAnnotationsValidator />
         <ValidationSummary />
 
-        <!-- Transaction Type -->
+        @* Transaction Type *@
         <div class="account-card">
             <label>Transaction Type</label>
             <InputSelect @bind-Value="_model.TransactionType" class="form-select">
@@ -169,7 +169,7 @@ else
         @* Show only feilds if transfer is chosen *@
         @if (_model.TransactionType == TransactionType.Transfer)
         {
-            <!-- From acount -->
+            @*From acount*@ 
             <div class="account-card">
                 <div class="account-title">From Account</div>
                 <div class="account-subtitle">Select the account to send from</div>
@@ -184,7 +184,8 @@ else
                     }
                 </InputSelect>
             </div>
-            <!-- To acount -->
+
+            @* To acount *@
             <div class="account-card">
                 <div class="account-title">To Account</div>
                 <div class="account-subtitle">Select the account to receive funds</div>
@@ -202,7 +203,7 @@ else
         }
         else
         {
-            <!-- If not transfer, show just one account option -->
+            @* If not transfer, show just one account option *@
             <div class="account-card">
                 <label>Account</label>
                 <InputSelect TValue="Guid"
@@ -217,7 +218,7 @@ else
             </div>
         }
 
-        <!-- Lägg till budget/utskriftkategorier -->
+        @* Lägg till budget/utskriftkategorier *@
         <div class="account-card">
             <label>Category</label>
             <InputSelect TValue="Guid"
@@ -226,7 +227,7 @@ else
             </InputSelect>
         </div>
 
-        <!-- Transaction amount -->
+        @* Transaction amount *@
         <div class="amount-card">
             <div class="amount-title">Set Amount</div>
             <div class="amount-subtitle">What Amount?</div>
@@ -236,7 +237,7 @@ else
             </div>
         </div>
 
-        <!-- Error Message -->
+        @* Error Message *@
         @if (!string.IsNullOrEmpty(_errorMessage))
         {
             <div class="alert alert-danger">
@@ -244,7 +245,7 @@ else
             </div>
         }
 
-        <!-- Submit Button -->
+        @* Submit Button *@
         <div style="text-align: center;">
             <button type="submit" class="btn my-custom-btn" style="margin-top: 20px; margin-bottom: 20px;">Submit</button>
         </div>
@@ -254,9 +255,9 @@ else
 
     <h4 style="text-align: center;">Accounts</h4>
 
-    //Visa hela lista med kategorier
+    @* Visa hela lista med kategorier *@
     <ul>
-        <!-- Show accounts list -->
+        @* Show accounts list *@
         @foreach (var account in _accounts)
         {
             <li>@account.Name: @account.Balance @account.Currency</li>
@@ -347,9 +348,9 @@ else
         _model.ToAccountId = Guid.Empty;
     }
 
-    // 🡨 Back navigation
+    // Back navigation
     private void GoBack()
     {
-        NavigationManager.NavigateTo("/"); // <-- change this to your desired route
+        NavigationManager.NavigateTo("/");
     }
 }

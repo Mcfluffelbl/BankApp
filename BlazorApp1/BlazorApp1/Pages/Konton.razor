@@ -8,7 +8,7 @@
 <h1>Create a Account</h1>
 
 <style>
-    <!-- Custom Button -->
+    @* Custom Button *@
 .my-custom-btn {
     background-color: seagreen; 
     color: aliceblue;
@@ -83,10 +83,10 @@ th:hover {
     <div class="text-danger">@_errorMessage</div>
 }
 
-<!-- Sort By -->
+@* Sort By *@ 
 @if (_accounts.Any())
 {
-    {/* Sort by if any accounts */}
+    @* Sort by if any accounts *@
     <table class="table table-striped table-bordered">
         <thead>
             <tr>
