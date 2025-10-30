@@ -123,8 +123,8 @@ namespace BlazorApp1.Domain
             LastUpdated = DateTime.Now;
             Transactions.Add(new Transaction
             {
-                Amount = -amount, 
-                TransactionType = TransactionType.Transferin,
+                Amount = -amount,
+                TransactionType = TransactionType.Transferout,
                 Date = DateTime.Now,
                 FromAccount = Id,
                 ToAccount = to.Id,
@@ -137,7 +137,7 @@ namespace BlazorApp1.Domain
             to.Transactions.Add(new Transaction
             {
                 Amount = amount,
-                TransactionType = TransactionType.Transferout,
+                TransactionType = TransactionType.Transferin,
                 Date = DateTime.Now,
                 FromAccount = Id,
                 ToAccount = to.Id,
