@@ -56,7 +56,7 @@
             var accountToRemove = _accounts.FirstOrDefault(a => a.Id == account.Id);
             if (accountToRemove != null)
             {
-                Console.WriteLine("");
+                Console.WriteLine("Deleted account from storage");
                 _accounts.Remove(accountToRemove);
                 await SaveAsync();
             }
@@ -89,12 +89,12 @@
             var toAccount = _accounts.FirstOrDefault(a => a.Id == toAccountId);
             if (fromAccount == null)
             {
-                Console.WriteLine("");
+                Console.WriteLine("Account not found when transfer from account");
                 throw new ArgumentException("From account not found");
             }
             if (toAccount == null)
             {
-                Console.WriteLine("");
+                Console.WriteLine("Account not found when transfer to account");
                 throw new ArgumentException("To account not found");
             }
             fromAccount.Transfer(toAccount, amount);
@@ -113,7 +113,7 @@
             var toAccount = _accounts.FirstOrDefault(a => a.Id == toAccountId);
             if (toAccount == null)
             {
-                Console.WriteLine("");
+                Console.WriteLine("Account not found when depositing");
                 throw new ArgumentException("Account not found");
             }
             toAccount.Deposit(amount);
@@ -132,7 +132,7 @@
             var fromAccount = _accounts.FirstOrDefault(a => a.Id == fromAccountId);
             if (fromAccount == null)
             {
-                Console.WriteLine("Account wasent found");
+                Console.WriteLine("Account was not found when withdrawing");
                 throw new ArgumentException("Account not found");
             }
             fromAccount.Withdraw(amount);
