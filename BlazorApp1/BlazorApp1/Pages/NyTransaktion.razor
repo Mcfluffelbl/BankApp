@@ -166,7 +166,7 @@ else
             </InputSelect>
         </div>
 
-        @* Show only feilds if transfer is chosen *@
+        @* Show only fields if transfer is chosen *@
         @if (_model.TransactionType == TransactionType.Transfer)
         {
             @* From acount *@ 
@@ -218,15 +218,21 @@ else
             </div>
         }
 
-        @* Ny: Lägg till budget/utskriftkategorier *@
-        <div class="account-card">
-            <label>Category</label>
-            <InputSelect TValue="Guid"
-                         class="form-select">
-                <option value="@Guid.Empty">-- Select an category --</option>
-            </InputSelect>
-        </div>
-
+        @if (_model.TransactionType == TransactionType.Withdrawal)
+        {
+            @* Ny: Lägg till budget/utskriftkategorier (visa bara för withdraw)*@
+            <div class="account-card">
+                <label>Category</label>
+                <InputSelect @bind-Value="_model.Category" class="form-select">
+                    <option value="">-- Select a category --</option>
+                    @foreach (var category in Enum.GetValues(typeof(CategoriesType)).Cast<CategoriesType>())
+                    {
+                        <option value="@category">@category</option>
+                    }
+                </InputSelect>
+            </div>
+        }
+            
         @* Transaction amount *@
         <div class="amount-card">
             <div class="amount-title">Set Amount</div>
@@ -270,7 +276,6 @@ else
     private List<BankAccount> _accounts = new();
     private List<BankAccount> _toAccounts = new();
     private string? _errorMessage;
-
     // 
     private class TransferFormModel
     {
@@ -278,6 +283,7 @@ else
         public Guid ToAccountId { get; set; }
         public decimal Amount { get; set; }
         public TransactionType TransactionType { get; set; } = TransactionType.Transfer;
+        public CategoriesType? Category { get; set; }
     }
 
     // On Start ----
