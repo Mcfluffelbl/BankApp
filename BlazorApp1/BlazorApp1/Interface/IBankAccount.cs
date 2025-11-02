@@ -13,7 +13,7 @@
         DateTime LastUpdated { get; }
         List<Transaction> Transactions { get; }
         void Deposit(decimal amount);
-        void Withdraw(decimal amount);
+        void Withdraw(decimal amount, CategoriesType? category = null);
         void Transfer(BankAccount to, decimal amount);
     }
 }

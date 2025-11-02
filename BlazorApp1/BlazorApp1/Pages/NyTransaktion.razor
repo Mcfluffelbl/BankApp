@@ -313,12 +313,13 @@ else
                     break;
 
                 case TransactionType.Withdrawal:
-                    AccountService.Withdraw(_model.FromAccountId, _model.Amount);
+                    AccountService.Withdraw(_model.FromAccountId, _model.Amount, _model.Category);
                     break;
             }
             _accounts = await AccountService.GetAccounts();
             _model.Amount = 0;
             _model.ToAccountId = Guid.Empty;
+            _model.Category = null;
             StateHasChanged();
         }
         catch (Exception ex)

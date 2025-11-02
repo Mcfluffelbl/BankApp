@@ -126,16 +126,19 @@
         /// <param name="fromAccountId"></param>
         /// <param name="amount"></param>
         /// <exception cref="ArgumentException"> If Account not found throw exception </exception>
-        public void Withdraw(Guid fromAccountId, decimal amount)
+        public void Withdraw(Guid fromAccountId, decimal amount, CategoriesType? category)
         {
             var fromStorage = _storageService.GetItemAsync<List<BankAccount>>(StorageKey);
             var fromAccount = _accounts.FirstOrDefault(a => a.Id == fromAccountId);
+
             if (fromAccount == null)
             {
                 Console.WriteLine("Account was not found when withdrawing");
                 throw new ArgumentException("Account not found");
             }
-            fromAccount.Withdraw(amount);
+
+            fromAccount.Withdraw(amount, category);
+
             _storageService.SetItemAsync(StorageKey, _accounts);
         }
     }

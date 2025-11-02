@@ -83,6 +83,7 @@ else
                     <th>Date</th>
                     <th>Amount</th>
                     <th>Transaktiontype</th>
+                    <th>Category</th>
                     <th>Amount after</th>
                     <th>From -> to</th>
                 </tr>
@@ -94,6 +95,16 @@ else
                         <td>@transaction.Date.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
                         <td>@transaction.Amount</td>
                         <td>@GetTransactionTypeText(transaction.TransactionType)</td>
+                        <td>
+                            @if (transaction.TransactionType == TransactionType.Withdrawal && transaction.Category != null)
+                            {
+                                @transaction.Category.ToString()
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
+                        </td>
                         <td>@transaction.BalanceAfterTransaction</td>
                         <td>
                             @if (transaction.FromAccount.HasValue || transaction.ToAccount.HasValue)

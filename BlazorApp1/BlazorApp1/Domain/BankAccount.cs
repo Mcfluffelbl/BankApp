@@ -68,7 +68,7 @@ namespace BlazorApp1.Domain
         /// <param name="amount">The specific amount</param>
         /// <exception cref="ArgumentException"> An exception if amount is or less than 0 </exception>
         /// <exception cref="InvalidOperationException">An exception if amount is incorrect</exception>
-        public void Withdraw(decimal amount)
+        public void Withdraw(decimal amount, CategoriesType? category = null)
         {
             if (amount <= 0)
             {
@@ -84,13 +84,16 @@ namespace BlazorApp1.Domain
             // Withdraw from account
             Balance -= amount;
             LastUpdated = DateTime.Now;
+
+            // Add transaction with category
             Transactions.Add(new Transaction
             {
                 Amount = -amount,
                 TransactionType = TransactionType.Withdrawal,
                 Date = DateTime.Now,
                 FromAccount = Id,
-                BalanceAfterTransaction = Balance
+                BalanceAfterTransaction = Balance,
+                Category = category
             });
             Console.WriteLine($"Withdrawn from {Id} = {amount} from {Balance}. ");
         }
