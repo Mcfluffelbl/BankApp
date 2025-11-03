@@ -129,7 +129,7 @@ else
     private DateTime? toDate;
     private TransactionType? selectedTransactionType;
 
-    //Startamount for sorting and filter
+    //Start amount for sorting and filter
     private SortKey currentKey = SortKey.Date;
     private bool descending = true;
     private IEnumerable<Transaction> filteredTransactions = new List<Transaction>();
@@ -238,7 +238,9 @@ else
         _ => type.ToString()
     };
 
-    // Apply the selected filter and remove selected filter
+    /// <summary>
+    /// Apply the selected filter and remove selected filter
+    /// </summary>
     private void ApplyFilters()
     {
         if (_selectedAccount == null)
@@ -254,7 +256,7 @@ else
             transactions = transactions.Where(t => t.Date >= fromDate.Value);
         }
 
-        // Inklude the hole daay
+        // Inklude the hole day
         if (toDate.HasValue)
         {
             transactions = transactions.Where(t => t.Date <= toDate.Value.AddDays(1).AddTicks(-1));
@@ -270,7 +272,9 @@ else
         Console.WriteLine($"Applied chosen filter for {selectedTransactionType}");
     }
 
-    // Clear chosen filter
+    /// <summary>
+    /// Clear chosen filter
+    /// </summary>
     private void ClearFilter()
     {
         selectedTransactionType = null;
