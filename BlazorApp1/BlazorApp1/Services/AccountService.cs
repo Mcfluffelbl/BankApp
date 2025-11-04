@@ -141,5 +141,17 @@
 
             _storageService.SetItemAsync(StorageKey, _accounts);
         }
+
+        //NY: 
+        public void ApplyInterest(Guid accountId)
+        {
+            var account = _accounts.FirstOrDefault(a => a.Id == accountId)
+            ?? throw new Exception("Account not found.");
+
+            // Lägg till enkel årlig ränta
+            var interest = account.Balance * (account.InterestRate / 100);
+            account.Balance += interest;
+            account.LastUpdated = DateTime.Now;
+        }
     }
 }

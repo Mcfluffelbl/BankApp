@@ -13,6 +13,9 @@ namespace BlazorApp1.Domain
         public DateTime LastUpdated { get; set; }
         public List<Transaction> Transactions { get; private set; } = new();
 
+        //Ny:
+        public decimal InterestRate { get; set; } = 3m;
+
         // Constructor
         public BankAccount(string name, AccountType accountType, string currency, decimal initialBalance)
         {
@@ -147,6 +150,14 @@ namespace BlazorApp1.Domain
                 BalanceAfterTransaction = to.Balance
             });
             Console.WriteLine($"Transfer {amount} from {Id} to {to.Id}");
+        }
+
+        //NY:
+        public void ApplyYearlyInterest()
+        {
+            var interest = Balance * (InterestRate / 100);
+            Balance += interest;
+            LastUpdated = DateTime.Now;
         }
     }
 }

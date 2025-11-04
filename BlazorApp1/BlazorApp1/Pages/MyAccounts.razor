@@ -26,6 +26,7 @@
                     <th @onclick="() => SortBy(nameof(BankAccount.LastUpdated))">
                         Last Updated @GetSortIndicator(nameof(BankAccount.LastUpdated))
                     </th>
+                    <th>Interest Rate</th>
                 </tr>
             </thead>
             <tbody>
@@ -38,6 +39,16 @@
                         <td style="text-align:right">@($"{account.Balance:N2}")</td>
                         <td>@account.LastUpdated.ToString("g")</td>
                         <td><button class="btn btn-danger" @onclick="() => DeleteAccountAsync(account)">Delete</button></td>
+                        <td>@($"{account.InterestRate:N2}%")</td>
+                        @*NY*@
+                        @if (account.AccountType == AccountType.Savings)
+                        {
+                            <button class="btn btn-success"
+                                    style="margin-left:5px"
+                                    @onclick="() => ApplyInterestAsync(account.Id)">
+                                Add Interest
+                            </button>
+                        }
                     </tr>
                 }
             </tbody>
@@ -155,4 +166,19 @@
             throw;
         }
 	}
+
+    //NY:
+    private async Task ApplyInterestAsync(Guid accountId)
+    {
+        try
+        {
+            AccountService.ApplyInterest(accountId);   // uppdatera i tjänsten
+            _accounts = await AccountService.GetAccounts(); // hämta nya värden
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error applying interest: {ex.Message}");
+        }
+    }
 }
