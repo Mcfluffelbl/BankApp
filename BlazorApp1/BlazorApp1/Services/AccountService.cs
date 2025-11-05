@@ -142,16 +142,19 @@
             _storageService.SetItemAsync(StorageKey, _accounts);
         }
 
-        //NY: 
-        public void ApplyInterest(Guid accountId)
+        //NY:
+        public async Task ApplyInterest(Guid accountId)
         {
-            var account = _accounts.FirstOrDefault(a => a.Id == accountId)
-            ?? throw new Exception("Account not found.");
+            await IsInitialized();
 
-            // Lägg till enkel årlig ränta
-            var interest = account.Balance * (account.InterestRate / 100);
-            account.Balance += interest;
-            account.LastUpdated = DateTime.Now;
+            var account = _accounts.FirstOrDefault(a => a.Id == accountId);
+            if (account != null && account.AccountType == AccountType.Savings)
+            {
+                decimal interestRate = 0.03m;
+                account.Balance += account.Balance * interestRate;
+                account.LastUpdated = DateTime.Now;
+                await SaveAsync();
+            }
         }
     }
 }

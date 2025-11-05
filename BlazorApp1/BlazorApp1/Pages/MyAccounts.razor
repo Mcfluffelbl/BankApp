@@ -27,7 +27,10 @@
                         Last Updated @GetSortIndicator(nameof(BankAccount.LastUpdated))
                     </th>
                     <th>Delete Account</th>
-                    <th>Interest Rate</th>
+                    @if (_accounts.Any(a => a.AccountType == AccountType.Savings))
+                    {
+                        <th>Interest Rate</th>
+                    }
                 </tr>
             </thead>
             <tbody>
@@ -40,15 +43,13 @@
                         <td style="text-align:right">@($"{account.Balance:N2}")</td>
                         <td>@account.LastUpdated.ToString("g")</td>
                         <td><button class="btn btn-danger" @onclick="() => DeleteAccountAsync(account)">Delete</button></td>
-                        <td>@($"{account.InterestRate:N2}%")</td>
-                        @*NY*@
                         @if (account.AccountType == AccountType.Savings)
                         {
-                            <button class="btn btn-success"
-                                    style="margin-left:5px"
-                                    @onclick="() => ApplyInterestAsync(account.Id)">
-                                Add Interest
-                            </button>
+                            <td>@($"{account.InterestRate:N2}%")</td>
+                        }
+                        else
+                        {
+                            <td></td>
                         }
                     </tr>
                 }
@@ -71,6 +72,23 @@
     protected override async Task OnInitializedAsync()
     {
         _accounts = await AccountService.GetAccounts();
+
+        foreach (var account in _accounts)
+        {
+			//If savings account, apply interest
+            if (account.AccountType == AccountType.Savings)
+            {
+                var monthsSinceUpdate = ((DateTime.Now.Year - account.LastUpdated.Year) * 12)
+                                      + DateTime.Now.Month - account.LastUpdated.Month;
+                // Add 3% interest each mounth
+                if (monthsSinceUpdate >= 1)
+                {
+                    await AccountService.ApplyInterest(account.Id); 
+                }
+            }
+        }
+		// Get uppdated amounts after interest applied
+        _accounts = await AccountService.GetAccounts(); 
     }
 
     /// <summary>
@@ -167,19 +185,4 @@
             throw;
         }
 	}
-
-    //NY:
-    private async Task ApplyInterestAsync(Guid accountId)
-    {
-        try
-        {
-            AccountService.ApplyInterest(accountId);   // uppdatera i tjänsten
-            _accounts = await AccountService.GetAccounts(); // hämta nya värden
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error applying interest: {ex.Message}");
-        }
-    }
 }

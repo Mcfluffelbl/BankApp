@@ -13,6 +13,6 @@ public interface IAccountService
     void Withdraw(Guid fromAccountId, decimal amount, CategoriesType? category);
 
     //NY:
-    void ApplyInterest(Guid accountId);
+    Task ApplyInterest(Guid accountId);
 }
 
