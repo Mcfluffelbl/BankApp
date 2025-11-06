@@ -92,7 +92,7 @@ else
 
         @if (_model.TransactionType == TransactionType.Withdrawal)
         {
-            @* Ny: Lägg till budget/utskriftkategorier (visa bara för withdraw)*@
+            @* Add to budget/kategories (Show only for withdraw)*@
             <div class="account-card">
                 <label>Category</label>
                 <InputSelect @bind-Value="_model.Category" class="form-select">
@@ -132,9 +132,8 @@ else
 
         <h4 style="text-align: center;">Accounts</h4>
 
-        @* Show the whole list with accounts *@
+        @* Show the list with accounts *@
         <ul>
-            @* Show accounts list *@
             @foreach (var account in _accounts)
             {
                 <li>@account.Name: @account.Balance @account.Currency</li>

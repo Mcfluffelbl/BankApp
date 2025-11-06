@@ -64,7 +64,6 @@ a, .btn-link {
     width: 100%;
     z-index: 1000;
 }
-
     #blazor-error-ui .dismiss {
         cursor: pointer;
         position: absolute;
@@ -77,7 +76,6 @@ a, .btn-link {
     padding: 1rem 1rem 1rem 3.7rem;
     color: white;
 }
-
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
@@ -89,7 +87,6 @@ a, .btn-link {
     height: 8rem;
     margin: 20vh auto 1rem auto;
 }
-
     .loading-progress circle {
         fill: none;
         stroke: #e0e0e0;
@@ -97,7 +94,6 @@ a, .btn-link {
         transform-origin: 50% 50%;
         transform: rotate(-90deg);
     }
-
         .loading-progress circle:last-child {
             stroke: #1b6ec2;
             stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
@@ -110,7 +106,6 @@ a, .btn-link {
     font-weight: bold;
     inset: calc(20vh + 3.25rem) 0 auto 0.2rem;
 }
-
     .loading-progress-text:after {
         content: var(--blazor-load-percentage-text, "Loading");
     }
@@ -408,17 +403,14 @@ th:hover {
     transform: scale(2);
     transition: background-color 0.3s ease, transform 0.1s ease;
 }
-
     .my-custom-btn2:hover {
         background-color: #0b5c5f;
         transform: scale(2.3);
     }
-
     .my-custom-btn2:active {
         background-color: darkslategray;
         transform: scale(1.9);
     }
-
     .my-custom-btn2:disabled {
         background-color: lightgray;
         color: darkgray;

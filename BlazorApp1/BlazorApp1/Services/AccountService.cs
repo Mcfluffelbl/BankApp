@@ -11,7 +11,6 @@
         {
             _storageService = storageService;
         }
-
         private async Task IsInitialized()
         {
             if (isLoaded)
