@@ -69,6 +69,10 @@
     private string? _currentSortColumn;
     private bool _sortAscending = true;
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     protected override async Task OnInitializedAsync()
     {
         _accounts = await AccountService.GetAccounts();
