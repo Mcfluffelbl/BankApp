@@ -1,138 +1,363 @@
-﻿@page "/NyTransaktion"
+﻿@page "/NewTransaktion"
 @using BlazorApp1.Domain
 @inject IAccountService AccountService
+@inject NavigationManager NavigationManager
 
-<style>
-.my-custom-btn2 {
-    background-color: seagreen; 
-    color: aliceblue;
-    border: none;
-    transition: background-color 0.3s ease, transform 0.1s ease;
-}
-.my-custom-btn2:hover {
-    background-color: darkolivegreen; 
-    transform: scale(1.03);
-}
-.my-custom-btn2:active {
-    background-color: grey;
-    transform: scale(0.98);
-}
-</style>
-
-<h1>Transaktion</h1>
-
-<h5>New Transaktion:</h5>
-
-<div class="card p-3 mt-3">
-    <div class="mb-2">
-        <label>Transaktionstyp:</label>
-        <select @bind="transactionType" class="form-select">
-            <option value="0">Insättning</option>
-            <option value="1">Uttag</option>
-            <option value="2">Överföring</option>
-        </select>
-    </div>
-
-    <div class="mb-2">
-        <label>Från konto:</label>
-        <select @bind="selectedFromAccount" class="form-select">
-            <option value="">-- Välj konto --</option>
-            @foreach (var acc in accounts)
-            {
-                <option value="@acc">@acc.Name (@acc.Balance:C)</option>
-            }
-        </select>
-    </div>
-
-    @if (transactionType == TransactionType.Transfer)
-    {
-        <div class="mb-2">
-            <label>Till konto:</label>
-            <select @bind="selectedToAccount" class="form-select">
-                <option value="">-- Välj konto --</option>
-                @foreach (var acc in accounts.Where(a => a != selectedFromAccount))
-                {
-                    <option value="@acc">@acc.Name (@acc.Balance:C)</option>
-                }
-            </select>
-        </div>
-    }
-
-    <div class="mb-2">
-        <label>Belopp:</label>
-        <input type="number" step="0.01" @bind="amount" class="form-control" />
-    </div>
-
-    <button class="btn my-custom-btn2" @onclick="ExecuteTransaction">Utför</button>
-
-    @if (!string.IsNullOrEmpty(message))
-    {
-        <div class="alert alert-info mt-3">@message</div>
-    }
+@* Back Button *@
+<div style="margin-bottom: 10px; top: 80px; z-index: 1000;">
+    <button class="btn back-btn" style="background-color: lightgray; padding: 5px 10px;" @onclick="GoBack">
+        ← Back
+    </button>
 </div>
 
-<button class="btn my-custom-btn2">Add New Transaction</button>
+<h1 style="text-align: center;">New Transaction</h1>
 
-@code {
-    private List<IBankAccount> accounts = new();
-    private IBankAccount? selectedFromAccount;
-    private IBankAccount? selectedToAccount;
-    private decimal amount;
-    private TransactionType transactionType;
-    private string? message;
+<hr />
 
-    protected override async Task OnInitializedAsync()
-    {
-        accounts = await AccountService.GetAccounts();
+<style>
+    @* Custom back button *@
+    back-btn {
+        background-color: transparent;
+        border: none;
+        color: #0b5c5a;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+    .back-btn:hover {
+        color: ;
     }
 
-    private async Task ExecuteTransaction()
+    @* Custom Box for amount *@
+    .amount-card {
+        background-color: #0b5c5a;
+        color: white;
+        border-radius: 10px;
+        padding: 30px;
+        text-align: center;
+        width: 300px;
+        margin: 20px auto;
+    }
+    .amount-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    .amount-subtitle {
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+        opacity: 0.9;
+    }
+    .amount-input-wrapper {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    .amount-input {
+        background: transparent;
+        border: none;
+        color: white;
+        font-size: 2.5rem;
+        font-weight: bold;
+        text-align: right;
+        width: 200px;
+        outline: none;
+    }
+    .amount-input:focus {
+        outline: none;
+    }
+    .amount-currency {
+        font-size: 2.5rem;
+        margin-left: 5px;
+    }
+
+    @* Custom Box for account *@
+    .account-card {
+        background-color: #0b5c5a;
+        color: white;
+        border-radius: 10px;
+        padding: 25px;
+        margin: 20px auto;
+        text-align: center;
+        width: 300px;
+    }
+    .account-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    .account-subtitle {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-bottom: 15px;
+    }
+    .account-select {
+        background-color: white;
+        color: #0b5c5a;
+        border: none;
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 1rem;
+        width: 100%;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .account-select:hover {
+        background-color: #e0f2f1;
+    }
+    .account-select:disabled {
+        background-color: #d9d9d9;
+        color: #777;
+        cursor: not-allowed;
+    }
+
+    @* Custom Button *@
+    .my-custom-btn {
+        background-color: #AC8BE8;
+        color: aliceblue;
+        border: none;
+        transform: scale(2);
+        transition: background-color 0.3s ease, transform 0.1s ease;
+    }
+    .my-custom-btn:hover {
+        background-color: #0b5c5f;
+        transform: scale(2.3);
+    }
+    .my-custom-btn:active {
+        background-color: darkslategray;
+        transform: scale(1.90);
+    }
+    .my-custom-btn:disabled {
+        background-color: lightgray;
+        color: darkgray;
+        cursor: not-allowed;
+    }
+    th {
+        cursor: pointer;
+        background-color: #f8f9fa;
+        user-select: none;
+    }
+    th:hover {
+        background-color: #e9ecef;
+    }
+</style>
+@if (_accounts.Count < 1)
+{
+    @* If less than one account show errror *@
+    <p>You need at least one account to make a transaction.</p>
+}
+else
+{
+    <EditForm Model="_model" OnValidSubmit="OnSubmitAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        @* Transaction Type *@
+        <div class="account-card">
+            <label>Transaction Type</label>
+            <InputSelect @bind-Value="_model.TransactionType" class="form-select">
+                @foreach (var type in Enum.GetValues(typeof(TransactionType))
+                            .Cast<TransactionType>()
+                            .Where(t => t != TransactionType.Transferin && t != TransactionType.Transferout))
+                {
+                    <option value="@type">@type</option>
+                }
+            </InputSelect>
+        </div>
+
+        @* Show only fields if transfer is chosen *@
+        @if (_model.TransactionType == TransactionType.Transfer)
+        {
+            @* From acount *@ 
+            <div class="account-card">
+                <div class="account-title">From Account</div>
+                <div class="account-subtitle">Select the account to send from</div>
+                <InputSelect TValue="Guid"
+                             @bind-Value="_model.FromAccountId"
+                             class="account-select"
+                             @onchange="HandleFormChanged">
+                    <option value="@Guid.Empty">-- Select an account --</option>
+                    @foreach (var account in _accounts)
+                    {
+                        <option value="@account.Id">@account.Name: @account.Balance @account.Currency</option>
+                    }
+                </InputSelect>
+            </div>
+
+            @* To acount *@
+            <div class="account-card">
+                <div class="account-title">To Account</div>
+                <div class="account-subtitle">Select the account to receive funds</div>
+                <InputSelect TValue="Guid"
+                             @bind-Value="_model.ToAccountId"
+                             class="account-select"
+                             disabled="@(_model.FromAccountId == Guid.Empty)">
+                    <option value="@Guid.Empty">Choose account</option>
+                    @foreach (var account in _toAccounts)
+                    {
+                        <option value="@account.Id">@account.Name: @account.Balance @account.Currency</option>
+                    }
+                </InputSelect>
+            </div>
+        }
+        else
+        {
+            @* If not transfer, show just one account option *@
+            <div class="account-card">
+                <label>Account</label>
+                <InputSelect TValue="Guid"
+                             @bind-Value="_model.FromAccountId"
+                             class="form-select">
+                    <option value="@Guid.Empty">-- Select an account --</option>
+                    @foreach (var account in _accounts)
+                    {
+                        <option value="@account.Id">@account.Name: @account.Balance @account.Currency</option>
+                    }
+                </InputSelect>
+            </div>
+        }
+
+        @if (_model.TransactionType == TransactionType.Withdrawal)
+        {
+            @* Ny: Lägg till budget/utskriftkategorier (visa bara för withdraw)*@
+            <div class="account-card">
+                <label>Category</label>
+                <InputSelect @bind-Value="_model.Category" class="form-select">
+                    <option value="">-- Select a category --</option>
+                    @foreach (var category in Enum.GetValues(typeof(CategoriesType)).Cast<CategoriesType>())
+                    {
+                        <option value="@category">@category</option>
+                    }
+                </InputSelect>
+            </div>
+        }
+            
+        @* Transaction amount *@
+        <div class="amount-card">
+            <div class="amount-title">Set Amount</div>
+            <div class="amount-subtitle">What Amount?</div>
+            <div class="amount-input-wrapper">
+                <InputNumber TValue="decimal" @bind-Value="_model.Amount" class="amount-input" />
+                <span class="amount-currency">$</span>
+            </div>
+        </div>
+
+        @* Error Message *@
+        @if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <div class="alert alert-danger">
+                @_errorMessage
+            </div>
+        }
+
+        @* Submit Button *@
+        <div style="text-align: center;">
+            <button type="submit" class="btn my-custom-btn" style="margin-top: 20px; margin-bottom: 20px;">Submit</button>
+        </div>
+    </EditForm>
+
+    <hr />
+
+    <h4 style="text-align: center;">Accounts</h4>
+
+    @* Show the whole list with accounts *@
+    <ul>
+        @* Show accounts list *@
+        @foreach (var account in _accounts)
+        {
+            <li>@account.Name: @account.Balance @account.Currency</li>
+        }
+    </ul>
+}
+@code {
+    // Constants
+    private readonly TransferFormModel _model = new();
+    private List<BankAccount> _accounts = new();
+    private List<BankAccount> _toAccounts = new();
+    private string? _errorMessage;
+    // 
+    private class TransferFormModel
     {
-        if (selectedFromAccount == null)
-        {
-            message = "Välj ett konto att göra transaktionen från.";
-            return;
-        }
-        if (amount <= 0)
-        {
-            message = "Beloppet måste vara större än noll.";
-            return;
-        }
+        public Guid FromAccountId { get; set; }
+        public Guid ToAccountId { get; set; }
+        public decimal Amount { get; set; }
+        public TransactionType TransactionType { get; set; } = TransactionType.Transfer;
+        public CategoriesType? Category { get; set; }
+    }
 
-        switch (transactionType)
+    // On Start ----
+    protected override async void OnInitialized()
+    {
+        _accounts = await AccountService.GetAccounts();
+        _toAccounts = _accounts;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    private async Task OnSubmitAsync()
+    {
+        _errorMessage = null;
+        try
         {
-            case TransactionType.Deposit:
-                selectedFromAccount.Deposit(amount);
-                message = $"Insättning på {amount:C} till {selectedFromAccount.Name}.";
-                break;
+            switch (_model.TransactionType)
+            {
+                case TransactionType.Transfer:
+                    AccountService.Transfer(_model.FromAccountId, _model.ToAccountId, _model.Amount);
+                    break;
 
-            case TransactionType.Withdrawal:
-                if (selectedFromAccount.Balance < amount)
-                {
-                    message = "Otillräckligt saldo för uttag.";
-                    return;
-                }
-                selectedFromAccount.Withdraw(amount);
-                message = $"Uttag på {amount:C} från {selectedFromAccount.Name}.";
-                break;
+                case TransactionType.Deposit:
+                    AccountService.Deposit(_model.FromAccountId, _model.Amount);
+                    break;
 
-            case TransactionType.Transfer:
-                if (selectedToAccount == null)
-                {
-                    message = "Välj ett mottagarkonto för överföring.";
-                    return;
-                }
-                if (selectedFromAccount.Balance < amount)
-                {
-                    message = "Otillräckligt saldo för överföring.";
-                    return;
-                }
-                selectedFromAccount.Withdraw(amount);
-                selectedToAccount.Deposit(amount);
-                message = $"Överförde {amount:C} från {selectedFromAccount.Name} till {selectedToAccount.Name}.";
-                break;
+                case TransactionType.Withdrawal:
+                    AccountService.Withdraw(_model.FromAccountId, _model.Amount, _model.Category);
+                    break;
+            }
+            _accounts = await AccountService.GetAccounts();
+            _model.Amount = 0;
+            _model.ToAccountId = Guid.Empty;
+            _model.Category = null;
+            StateHasChanged();
         }
-        // Spara ändringar i AccountService
-        await AccountService.UpdateAccounts(accounts);
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+            StateHasChanged();
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="eventArgs"></param>
+    private void HandleFormChanged(ChangeEventArgs eventArgs)
+    {
+        if (Guid.TryParse(eventArgs.Value?.ToString(), out var id))
+        {
+            OnFormChanged(id);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="fromId"></param>
+    private void OnFormChanged(Guid fromId)
+    {
+        _model.FromAccountId = fromId;
+        var from = _accounts.FirstOrDefault(x => x.Id == fromId);
+        _toAccounts = from != null
+            ? _accounts.Where(a => a.Id != from.Id).ToList()
+            : _accounts.ToList();
+        _model.ToAccountId = Guid.Empty;
+    }
+
+    // Back navigation
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/");
     }
 }

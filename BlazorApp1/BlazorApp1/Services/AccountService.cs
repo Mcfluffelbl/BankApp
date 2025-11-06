@@ -15,14 +15,16 @@
         private async Task IsInitialized()
         {
             if (isLoaded)
+            {
                 return;
-
+            }
             var fromStorage = await _storageService.GetItemAsync<List<BankAccount>>(StorageKey);
             _accounts.Clear();
 
             if (fromStorage is { Count: > 0 })
+            {
                 _accounts.AddRange(fromStorage);
-
+            }
             isLoaded = true;
         }
         }
@@ -30,40 +32,129 @@
 <<<<<<< Updated upstream
         private Task SaveAsync() => _storageService.SetItemAsync(StorageKey, _accounts);
 
-        public async Task<IBankAccount> CreateAccount(string name, AccountType accountType, string currency, decimal initialBalance)
+        public async Task<BankAccount> CreateAccount(string name, AccountType accountType, string currency, decimal initialBalance) //Liknande transaktion?
         {
             await IsInitialized();
-            var account = new BankAccount(Guid.NewGuid(), name, accountType, currency, initialBalance);
-=======
             var account = new BankAccount(name, accountType, currency, initialBalance);
->>>>>>> Stashed changes
             _accounts.Add(account);
             return account;
         }
-        public async Task<List<IBankAccount>> GetAccounts()
+
         public async Task<List<BankAccount>> GetAccounts()
         {
 <<<<<<< Updated upstream
             await IsInitialized();
-            return _accounts.Cast<IBankAccount>().ToList();
+            return _accounts.Cast<BankAccount>().ToList();
         }
 
-        public async Task DeleteAccount(IBankAccount account)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="account"></param>
+        /// <returns></returns>
+        public async Task DeleteAccount(BankAccount account)
         {
             await IsInitialized();
             var accountToRemove = _accounts.FirstOrDefault(a => a.Id == account.Id);
             if (accountToRemove != null)
             {
+                Console.WriteLine("Deleted account from storage");
                 _accounts.Remove(accountToRemove);
                 await SaveAsync();
         }
 
-        public async Task UpdateAccounts(List<IBankAccount> updatedAccounts)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="updatedAccounts"></param>
+        /// <returns></returns>
+        public async Task UpdateAccounts(List<BankAccount> updatedAccounts)
         {
             await IsInitialized();
             _accounts.Clear();
             _accounts.AddRange(updatedAccounts.Cast<BankAccount>());
             await SaveAsync();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fromAccountId"></param>
+        /// <param name="toAccountId"></param>
+        /// <param name="amount"></param>
+        /// <exception cref="ArgumentException"> If Account not found throw exception </exception>
+        public void Transfer(Guid fromAccountId, Guid toAccountId, decimal amount)
+        {
+            var fromStorage = _storageService.GetItemAsync<List<BankAccount>>(StorageKey);
+            var fromAccount = _accounts.FirstOrDefault(a => a.Id == fromAccountId);
+            var toAccount = _accounts.FirstOrDefault(a => a.Id == toAccountId);
+            if (fromAccount == null)
+            {
+                Console.WriteLine("Account not found when transfer from account");
+                throw new ArgumentException("From account not found");
+            }
+            if (toAccount == null)
+            {
+                Console.WriteLine("Account not found when transfer to account");
+                throw new ArgumentException("To account not found");
+            }
+            fromAccount.Transfer(toAccount, amount);
+            _storageService.SetItemAsync(StorageKey, _accounts);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="toAccountId"></param>
+        /// <param name="amount"></param>
+        /// <exception cref="ArgumentException"> If Account not found throw exception </exception>
+        public void Deposit(Guid toAccountId, decimal amount)
+        {
+            var fromStorage = _storageService.GetItemAsync<List<BankAccount>>(StorageKey);
+            var toAccount = _accounts.FirstOrDefault(a => a.Id == toAccountId);
+            if (toAccount == null)
+            {
+                Console.WriteLine("Account not found when depositing");
+                throw new ArgumentException("Account not found");
+            }
+            toAccount.Deposit(amount);
+            _storageService.SetItemAsync(StorageKey, _accounts);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fromAccountId"></param>
+        /// <param name="amount"></param>
+        /// <exception cref="ArgumentException"> If Account not found throw exception </exception>
+        public void Withdraw(Guid fromAccountId, decimal amount, CategoriesType? category)
+        {
+            var fromStorage = _storageService.GetItemAsync<List<BankAccount>>(StorageKey);
+            var fromAccount = _accounts.FirstOrDefault(a => a.Id == fromAccountId);
+
+            if (fromAccount == null)
+            {
+                Console.WriteLine("Account was not found when withdrawing");
+                throw new ArgumentException("Account not found");
+            }
+
+            fromAccount.Withdraw(amount, category);
+
+            _storageService.SetItemAsync(StorageKey, _accounts);
+        }
+
+        //NY:
+        public async Task ApplyInterest(Guid accountId)
+        {
+            await IsInitialized();
+
+            var account = _accounts.FirstOrDefault(a => a.Id == accountId);
+            if (account != null && account.AccountType == AccountType.Savings)
+            {
+                decimal interestRate = 0.03m;
+                account.Balance += account.Balance * interestRate;
+                account.LastUpdated = DateTime.Now;
+                await SaveAsync();
             }
         }
     }

@@ -3,66 +3,107 @@
 
 <PageTitle>Welcome to Voltra Bank</PageTitle>
 
-<style>
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f5f7fa;
-        margin: 0;
-        color: #333;
-    }
+@if (!isLoggedIn)
+{
+    <div class="popup-backdrop">
+        <div class="popup">
+            <h2>Login Required</h2>
+            <p>Input youre code to continue:</p>
+            <input type="password" @bind="userCode" placeholder="Password here..." />
+            <button class="my-custom-btn3" @onclick="CheckLogin">Login</button>
+            @if (showError)
+            {
+                <p style="color:red;">Login Error, try agian.</p>
+            }
+		</div>
+    </div>
+    <style>
+        .popup-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+        .popup {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            text-align: center;
+            width: 300px;
+        }
+        .popup input {
+            width: 80%;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+    </style>
+}
+else
+{
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            color: #333;
+        }
 
-    /* === Hero section === */
-    .hero {
-        background: linear-gradient(135deg, #004d40, #00796b);
-        color: white;
-        text-align: center;
-        padding: 80px 20px;
-        border-radius: 0 0 50px 50px;
-        box-shadow: 0 6px 15px rgba(0,0,0,0.2);
-    }
-
+        @* Hero section *@
+        .hero {
+            background: linear-gradient(135deg, #004d40, #00796b);
+            color: white;
+            text-align: center;
+            padding: 80px 20px;
+            border-radius: 0 0 50px 50px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+        }
         .hero h1 {
             font-size: 3rem;
             margin-bottom: 10px;
         }
-
         .hero h4 {
             font-weight: 400;
             max-width: 600px;
             margin: 0 auto;
             opacity: 0.9;
         }
-
         .hero svg {
             margin-top: 20px;
             color: #e0f2f1;
         }
 
-    /* === Content section === */
-    .content {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 30px;
-        margin: 60px auto;
-        max-width: 1000px;
-        text-align: center;
-    }
-
-    .card {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        padding: 20px;
-        width: 280px;
-        transition: transform 0.2s ease, box-shadow 0.3s ease;
-    }
-
+        @* Content section *@
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin: 60px auto;
+            max-width: 1000px;
+            text-align: center;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 20px;
+            width: 280px;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+        }
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 18px rgba(0,0,0,0.15);
         }
-
         .card img {
             border-radius: 12px;
             width: 100%;
@@ -70,81 +111,96 @@
             object-fit: cover;
             margin-bottom: 15px;
         }
-
         .card h2 {
             color: #004d40;
             font-size: 1.3rem;
             margin-bottom: 10px;
         }
-
         .card h4 {
             font-weight: 400;
             font-size: 0.95rem;
             color: #555;
         }
 
-    /* === Button styling === */
-    .my-custom-btn3 {
-        background-color: #00796b;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 12px 20px;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: all 0.2s ease-in-out;
-        margin-top: 10px;
-    }
-
+        @* Button styling *@
+        .my-custom-btn3 {
+            background-color: #00796b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            margin-top: 10px;
+        }
         .my-custom-btn3:hover {
             background-color: #004d40;
             transform: scale(1.05);
         }
-
         .my-custom-btn3:active {
             background-color: #555;
             transform: scale(0.97);
         }
+    </style>
 
-</style>
+    @* Hero section *@
+    <div class="hero">
+        <h1>Voltra Bank</h1>
+        <h4>Empowering your financial future — manage your economy with confidence.</h4>
 
-<!-- === Hero section === -->
-<div class="hero">
-    <h1>Voltra Bank</h1>
-    <h4>Empowering your financial future — manage your economy with confidence.</h4>
-
-    <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" fill="currentColor" class="bi bi-currency-exchange" viewBox="0 0 16 16">
-        <path d="M0 5a5 5 0 0 0 4.027 4.905 6.5 6.5 0 0 1 .544-2.073C3.695 7.536 3.132 6.864 3 5.91h-.5v-.426h.466V5.05q-.001-.07.004-.135H2.5v-.427h.511C3.236 3.24 4.213 2.5 5.681 2.5c.316 0 .59.031.819.085v.733a3.5 3.5 0 0 0-.815-.082c-.919 0-1.538.466-1.734 1.252h1.917v.427h-1.98q-.004.07-.003.147v.422h1.983v.427H3.93c.118.602.468 1.03 1.005 1.229a6.5 6.5 0 0 1 4.97-3.113A5.002 5.002 0 0 0 0 5m16 5.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0m-7.75 1.322c.069.835.746 1.485 1.964 1.562V14h.54v-.62c1.259-.086 1.996-.74 1.996-1.69 0-.865-.563-1.31-1.57-1.54l-.426-.1V8.374c.54.06.884.347.966.745h.948c-.07-.804-.779-1.433-1.914-1.502V7h-.54v.629c-1.076.103-1.808.732-1.808 1.622 0 .787.544 1.288 1.45 1.493l.358.085v1.78c-.554-.08-.92-.376-1.003-.787zm1.96-1.895c-.532-.12-.82-.364-.82-.732 0-.41.311-.719.824-.809v1.54h-.005zm.622 1.044c.645.145.943.38.943.796 0 .474-.37.8-1.02.86v-1.674z" />
-    </svg>
-</div>
-
-<!-- === Info Cards === -->
-<div class="content">
-
-    <div class="card">
-        <img src="images/aktiefonder-768x434.jpg" alt="Voltra Bank Logo" />
-        <h2>Invest Smart</h2>
-        <h4>Discover our beginner-friendly stock guide and grow your wealth today.</h4>
+        <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" fill="currentColor" class="bi bi-currency-exchange" viewBox="0 0 16 16">
+            <path d="M0 5a5 5 0 0 0 4.027 4.905 6.5 6.5 0 0 1 .544-2.073C3.695 7.536 3.132 6.864 3 5.91h-.5v-.426h.466V5.05q-.001-.07.004-.135H2.5v-.427h.511C3.236 3.24 4.213 2.5 5.681 2.5c.316 0 .59.031.819.085v.733a3.5 3.5 0 0 0-.815-.082c-.919 0-1.538.466-1.734 1.252h1.917v.427h-1.98q-.004.07-.003.147v.422h1.983v.427H3.93c.118.602.468 1.03 1.005 1.229a6.5 6.5 0 0 1 4.97-3.113A5.002 5.002 0 0 0 0 5m16 5.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0m-7.75 1.322c.069.835.746 1.485 1.964 1.562V14h.54v-.62c1.259-.086 1.996-.74 1.996-1.69 0-.865-.563-1.31-1.57-1.54l-.426-.1V8.374c.54.06.884.347.966.745h.948c-.07-.804-.779-1.433-1.914-1.502V7h-.54v.629c-1.076.103-1.808.732-1.808 1.622 0 .787.544 1.288 1.45 1.493l.358.085v1.78c-.554-.08-.92-.376-1.003-.787zm1.96-1.895c-.532-.12-.82-.364-.82-.732 0-.41.311-.719.824-.809v1.54h-.005zm.622 1.044c.645.145.943.38.943.796 0 .474-.37.8-1.02.86v-1.674z" />
+        </svg>
     </div>
 
-    <div class="card">
-        <img src="images/iStock-501199714.jpg" alt="Voltra Bank Logo" />
-        <h2>Market News</h2>
-        <h4>Stay updated — Pineapple Pizza stocks are on the rise! 🍍📈</h4>
-    </div>
+    @* Info Cards *@
+    <div class="content">
 
-    <div class="card">
-        <img src="https://media.giphy.com/media/3o6Zt481isNVuQI1l6/giphy.gif" alt="Dancing Money" />
-        <h2>Security Alert</h2>
-        <h4>Beware of suspicious links and fake offers. Stay protected online.</h4>
-        <button type="button" class="my-custom-btn3"
-                onclick="window.location.href='https://youtu.be/dQw4w9WgXcQ'">
-            Learn More
-        </button>
-    </div>
+        <div class="card">
+            <img src="images/aktiefonder-768x434.jpg" alt="Voltra Bank Logo" />
+            <h2>Invest Smart</h2>
+            <h4>Discover our beginner-friendly stock guide and grow your wealth today.</h4>
+        </div>
 
-</div>
+        <div class="card">
+            <img src="images/iStock-501199714.jpg" alt="Voltra Bank Logo" />
+            <h2>Market News</h2>
+            <h4>Stay updated — Pineapple Pizza stocks are on the rise! 🍍📈</h4>
+        </div>
+
+        <div class="card">
+            <img src="https://media.giphy.com/media/3o6Zt481isNVuQI1l6/giphy.gif" alt="Dancing Money" />
+            <h2>Security Alert</h2>
+            <h4>Beware of suspicious links and fake offers. Stay protected online.</h4>
+            <button type="button" class="my-custom-btn3"
+                    onclick="window.location.href='https://www.youtube.com/shorts/Ay8lynMZ4mE?feature=share'">
+                Learn More
+            </button>
+        </div>
+
+    </div>
+}
 
 @code {
+    private bool isLoggedIn = false;
+    private string userCode = "";
+    private bool showError = false;
 
+    /// <summary>
+	/// Adds login functionality
+    /// </summary>
+    private void CheckLogin()
+    {
+		// Control if the userCode is correct
+		if (userCode == "1234") // Switch to your desired code
+        {
+            isLoggedIn = true;
+            showError = false;
+        }
+        else
+        {
+            showError = true;
+        }
+	}
 }

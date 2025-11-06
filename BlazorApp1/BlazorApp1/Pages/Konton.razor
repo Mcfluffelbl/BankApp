@@ -7,8 +7,8 @@
 
 <h1>Create a Account</h1>
 
-<!-- Egen custom code för custom knapp -->
 <style>
+    @* Custom Button *@
 .my-custom-btn {
     background-color: seagreen; 
     color: aliceblue;
@@ -36,7 +36,6 @@ th {
 th:hover {            
     background-color: #e9ecef;
 }
-
 </style>
 
 <EditForm Model="_model" OnValidSubmit="CreateAccountAsync" OnInvalidSubmit="HandleInvalidSubmit">
@@ -81,11 +80,12 @@ th:hover {
 
 @if (!string.IsNullOrEmpty(_errorMessage))
 {
+    Console.WriteLine("Invalid Account");
     <div class="text-danger">@_errorMessage</div>
 }
-
 @if (_accounts.Any())
 {
+    @* Sort by if any accounts *@
     <table class="table table-striped table-bordered">
         <thead>
             <tr>
@@ -122,25 +122,29 @@ th:hover {
 }
 else
 {
-    <p>Inga konton skapade än.</p>
+    Console.WriteLine("No accounts created yet to put up in the list");
+    <p>No accounts created yet.</p>
 }
-
 @code {
+    // Constants
     private CreateAccountModel _model = new();
-    private List<IBankAccount> _accounts = new();
+    private List<BankAccount> _accounts = new();
     private string? _errorMessage;
     private bool _isValid = false;
-
     private string? _currentSortColumn;
     private bool _sortAscending = true;
 
     protected override async Task OnInitializedAsync()
     {
         _accounts = await AccountService.GetAccounts();
-        SortBy(nameof(IBankAccount.Name));
+        SortBy(nameof(BankAccount.Name));
     }
 
-    public async Task CreateAccountAsync()
+    /// <summary>
+    /// Create a account ---
+    /// </summary>
+    /// <returns></returns>
+    private async Task CreateAccountAsync()
     {
         try
         {
@@ -151,29 +155,37 @@ else
                 _model.Currency!,
                 _model.InitialBalance
             );
-
             _accounts = await AccountService.GetAccounts();
-			SortBy(_currentSortColumn ?? nameof(IBankAccount.Name));// sortera efter den kolumnen som användaren klickade på
+            SortBy(_currentSortColumn ?? nameof(BankAccount.Name));// sortera efter den kolumnen som användaren klickade på
             _model = new CreateAccountModel(); // töm formulär
-			_isValid = false; // återställ valideringsstatus
+            _isValid = false; // återställ valideringsstatus
         }
         catch (Exception ex)
         {
             _errorMessage = ex.Message;
         }
-
         StateHasChanged();
     }
 
-	private void SortBy(string? columnName) // SortBy metod för att sortera kolumnerna
+    /// <summary>
+    /// Sort by the collums
+    /// </summary>
+    /// <param name="columnName"> Toggle ascending/descending </param>
+    private void SortBy(string? columnName) 
     {
         if (string.IsNullOrEmpty(columnName))
+        {
+            Console.WriteLine("The column is empty");
             return;
-
+        }
         if (_currentSortColumn == columnName)
-            _sortAscending = !_sortAscending; // toggle ascending/descending
+        {
+            Console.WriteLine("Sorting Column");
+            _sortAscending = !_sortAscending;
+        }
         else
         {
+            Console.WriteLine("Sorting Column by name");
             _currentSortColumn = columnName;
             _sortAscending = true;
         }
@@ -204,19 +216,28 @@ else
         };
     }
 
-	private string GetSortIndicator(string columnName) //GetSortIndicator metod för att visa uppåt- eller nedåtpil beroende på sorteringsordning
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="columnName"></param>
+    /// <returns></returns>
+    private string GetSortIndicator(string columnName)
     {
         if (_currentSortColumn != columnName)
+        {
             return string.Empty;
-
+        }
         return _sortAscending ? "▲" : "▼";
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     private void HandleInvalidSubmit()
     {
-		_errorMessage = "Please correct the errors and try again.";
+        _errorMessage = "Please correct the errors and try again.";
         _isValid = false;
-	}
+    }
     private void OnFieldChanged()
     {
         var context = new ValidationContext(_model);
@@ -224,6 +245,9 @@ else
         _isValid = Validator.TryValidateObject(_model, context, results, true);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public class CreateAccountModel
     {
         [Required(ErrorMessage = "Account name is required")]
@@ -233,7 +257,7 @@ else
         public AccountType AccountType { get; set; } = AccountType.Savings;
 
 		[Required(ErrorMessage = "Currency is required")]
-		public string? Currency { get; set; } = "SEK"; //lägga till fler valutor senare? Eller låsa till bara SEK?
+		public string? Currency { get; set; } = "SEK";
 
 		[Range(0, double.MaxValue, ErrorMessage = "Initial balance must be non-negative")]
         public decimal InitialBalance { get; set; }
