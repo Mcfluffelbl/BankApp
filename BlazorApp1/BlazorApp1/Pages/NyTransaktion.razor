@@ -1,138 +1,239 @@
-﻿@page "/NyTransaktion"
+﻿@page "/NewTransaktion"
 @using BlazorApp1.Domain
 @inject IAccountService AccountService
+@inject NavigationManager NavigationManager
 
-<style>
-.my-custom-btn2 {
-    background-color: seagreen; 
-    color: aliceblue;
-    border: none;
-    transition: background-color 0.3s ease, transform 0.1s ease;
-}
-.my-custom-btn2:hover {
-    background-color: darkolivegreen; 
-    transform: scale(1.03);
-}
-.my-custom-btn2:active {
-    background-color: grey;
-    transform: scale(0.98);
-}
-</style>
-
-<h1>Transaktion</h1>
-
-<h5>New Transaktion:</h5>
-
-<div class="card p-3 mt-3">
-    <div class="mb-2">
-        <label>Transaktionstyp:</label>
-        <select @bind="transactionType" class="form-select">
-            <option value="0">Insättning</option>
-            <option value="1">Uttag</option>
-            <option value="2">Överföring</option>
-        </select>
-    </div>
-
-    <div class="mb-2">
-        <label>Från konto:</label>
-        <select @bind="selectedFromAccount" class="form-select">
-            <option value="">-- Välj konto --</option>
-            @foreach (var acc in accounts)
-            {
-                <option value="@acc">@acc.Name (@acc.Balance:C)</option>
-            }
-        </select>
-    </div>
-
-    @if (transactionType == TransactionType.Transfer)
-    {
-        <div class="mb-2">
-            <label>Till konto:</label>
-            <select @bind="selectedToAccount" class="form-select">
-                <option value="">-- Välj konto --</option>
-                @foreach (var acc in accounts.Where(a => a != selectedFromAccount))
-                {
-                    <option value="@acc">@acc.Name (@acc.Balance:C)</option>
-                }
-            </select>
-        </div>
-    }
-
-    <div class="mb-2">
-        <label>Belopp:</label>
-        <input type="number" step="0.01" @bind="amount" class="form-control" />
-    </div>
-
-    <button class="btn my-custom-btn2" @onclick="ExecuteTransaction">Utför</button>
-
-    @if (!string.IsNullOrEmpty(message))
-    {
-        <div class="alert alert-info mt-3">@message</div>
-    }
+@* Back Button *@
+<div style="margin-bottom: 10px; top: 80px; z-index: 1000;">
+    <button class="btn back-btn" style="background-color: lightgray; padding: 5px 10px;" @onclick="GoBack">
+        ← Back
+    </button>
 </div>
 
-<button class="btn my-custom-btn2">Add New Transaction</button>
+@if (_accounts.Count < 1)
+{
+    <h1 style="text-align: center;">New Transaction</h1>
+	<hr />
+    @* Show message if no accounts are avalible *@
+    <p>You need at least one account to make a transaction.</p>
+	Console.WriteLine("No accounts available to make a transaction");
+}
+else
+{
+    <EditForm Model="_model" OnValidSubmit="OnSubmitAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
 
+        <h1 style="text-align: center;">New Transaction</h1>
+
+        @* Transaction type selection *@
+        <div class="account-card">
+            <label>Transaction Type</label>
+            <InputSelect @bind-Value="_model.TransactionType" class="form-select">
+                @foreach (var type in Enum.GetValues(typeof(TransactionType))
+                            .Cast<TransactionType>()
+                            .Where(t => t != TransactionType.Transferin
+                            && t != TransactionType.Transferout
+                            && t != TransactionType.Interest))
+                {
+                    <option value="@type">@type</option>
+                }
+            </InputSelect>
+        </div>
+
+        @* Show transfer-specific fields if the selected type is Transfer *@
+        @if (_model.TransactionType == TransactionType.Transfer)
+        {
+            @* From acount *@ 
+            <div class="account-card">
+                <div class="account-title">From Account</div>
+                <div class="account-subtitle">Select the account to send from</div>
+                <InputSelect TValue="Guid"
+                             @bind-Value="_model.FromAccountId"
+                             class="account-select"
+                             @onchange="HandleFormChanged">
+                    <option value="@Guid.Empty">-- Select an account --</option>
+                    @foreach (var account in _accounts)
+                    {
+                        <option value="@account.Id">@account.Name: @account.Balance @account.Currency</option>
+                    }
+                </InputSelect>
+            </div>
+
+            @* To acount *@
+            <div class="account-card">
+                <div class="account-title">To Account</div>
+                <div class="account-subtitle">Select the account to receive funds</div>
+                <InputSelect TValue="Guid"
+                             @bind-Value="_model.ToAccountId"
+                             class="account-select"
+                             disabled="@(_model.FromAccountId == Guid.Empty)">
+                    <option value="@Guid.Empty">Choose account</option>
+                    @foreach (var account in _toAccounts)
+                    {
+                        <option value="@account.Id">@account.Name: @account.Balance @account.Currency</option>
+                    }
+                </InputSelect>
+            </div>
+        }
+        else
+        {
+            @* For non-transfer transactions, show a single account selection *@
+            <div class="account-card">
+                <label>Account</label>
+                <InputSelect TValue="Guid"
+                             @bind-Value="_model.FromAccountId"
+                             class="form-select">
+                    <option value="@Guid.Empty">-- Select an account --</option>
+                    @foreach (var account in _accounts)
+                    {
+                        <option value="@account.Id">@account.Name: @account.Balance @account.Currency</option>
+                    }
+                </InputSelect>
+            </div>
+        }
+
+        @if (_model.TransactionType == TransactionType.Withdrawal)
+        {
+            @* Show category selection only for withdrawals *@
+            <div class="account-card">
+                <label>Category</label>
+                <InputSelect @bind-Value="_model.Category" class="form-select">
+                    <option value="">-- Select a category --</option>
+                    @foreach (var category in Enum.GetValues(typeof(CategoriesType)).Cast<CategoriesType>())
+                    {
+                        <option value="@category">@category</option>
+                    }
+                </InputSelect>
+            </div>
+        }
+
+        @* Transaction amount input *@
+        <div class="amount-card">
+            <div class="amount-title">Set Amount</div>
+            <div class="amount-subtitle">What Amount?</div>
+            <div class="amount-input-wrapper">
+                <InputNumber TValue="decimal" @bind-Value="_model.Amount" class="amount-input" />
+                <span class="amount-currency">$</span>
+            </div>
+        </div>
+
+        @* Display error message if one exists *@
+        @if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <div class="alert alert-danger">
+                @_errorMessage
+            </div>
+        }
+
+        @* Submit Button *@
+        <div style="text-align: center;">
+            <button type="submit" class="btn my-custom-btn2" style="margin-top: 20px; margin-bottom: 20px;">Submit</button>
+        </div>
+
+        <hr />
+
+        <h4 style="text-align: center;">Accounts</h4>
+
+        @* Display a list of all accounts *@
+        <ul>
+            @foreach (var account in _accounts)
+            {
+                <li>@account.Name: @account.Balance @account.Currency</li>
+            }
+        </ul>
+    </EditForm>
+}
 @code {
-    private List<IBankAccount> accounts = new();
-    private IBankAccount? selectedFromAccount;
-    private IBankAccount? selectedToAccount;
-    private decimal amount;
-    private TransactionType transactionType;
-    private string? message;
+    // Fields and constants
+    private readonly TransferFormModel _model = new();
+    private List<BankAccount> _accounts = new();
+    private List<BankAccount> _toAccounts = new();
+    private string? _errorMessage;
 
-    protected override async Task OnInitializedAsync()
+    // Form model
+    private class TransferFormModel
     {
-        accounts = await AccountService.GetAccounts();
+        public Guid FromAccountId { get; set; }
+        public Guid ToAccountId { get; set; }
+        public decimal Amount { get; set; }
+        public TransactionType TransactionType { get; set; } = TransactionType.Transfer;
+        public CategoriesType? Category { get; set; }
     }
 
-    private async Task ExecuteTransaction()
+    // Lifecycle
+    protected override async void OnInitialized()
     {
-        if (selectedFromAccount == null)
-        {
-            message = "Välj ett konto att göra transaktionen från.";
-            return;
-        }
-        if (amount <= 0)
-        {
-            message = "Beloppet måste vara större än noll.";
-            return;
-        }
+        _accounts = await AccountService.GetAccounts();
+        _toAccounts = _accounts;
+    }
 
-        switch (transactionType)
+    /// <summary>
+    /// Handles form submission and performs the appropriate transaction
+    /// based on the selected transaction type.
+    /// </summary>
+    private async Task OnSubmitAsync()
+    {
+        _errorMessage = null;
+        try
         {
-            case TransactionType.Deposit:
-                selectedFromAccount.Deposit(amount);
-                message = $"Insättning på {amount:C} till {selectedFromAccount.Name}.";
-                break;
+            switch (_model.TransactionType)
+            {
+                case TransactionType.Transfer:
+                    AccountService.Transfer(_model.FromAccountId, _model.ToAccountId, _model.Amount);
+                    break;
 
-            case TransactionType.Withdrawal:
-                if (selectedFromAccount.Balance < amount)
-                {
-                    message = "Otillräckligt saldo för uttag.";
-                    return;
-                }
-                selectedFromAccount.Withdraw(amount);
-                message = $"Uttag på {amount:C} från {selectedFromAccount.Name}.";
-                break;
+                case TransactionType.Deposit:
+                    AccountService.Deposit(_model.FromAccountId, _model.Amount);
+                    break;
 
-            case TransactionType.Transfer:
-                if (selectedToAccount == null)
-                {
-                    message = "Välj ett mottagarkonto för överföring.";
-                    return;
-                }
-                if (selectedFromAccount.Balance < amount)
-                {
-                    message = "Otillräckligt saldo för överföring.";
-                    return;
-                }
-                selectedFromAccount.Withdraw(amount);
-                selectedToAccount.Deposit(amount);
-                message = $"Överförde {amount:C} från {selectedFromAccount.Name} till {selectedToAccount.Name}.";
-                break;
+                case TransactionType.Withdrawal:
+                    AccountService.Withdraw(_model.FromAccountId, _model.Amount, _model.Category);
+                    break;
+            }
+            // Refresh account list and reset form fields
+            _accounts = await AccountService.GetAccounts();
+            _model.Amount = 0;
+            _model.ToAccountId = Guid.Empty;
+            _model.Category = null;
+            StateHasChanged();
         }
-        // Spara ändringar i AccountService
-        await AccountService.UpdateAccounts(accounts);
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+            StateHasChanged();
+        }
+    }
+
+    /// <summary>
+    ///  Handles changes in the "From Account" dropdown.
+    /// </summary>
+    private void HandleFormChanged(ChangeEventArgs eventArgs)
+    {
+        if (Guid.TryParse(eventArgs.Value?.ToString(), out var id))
+        {
+            OnFormChanged(id);
+        }
+    }
+
+    /// <summary>
+    /// Updates the "To Account" list based on the selected "From Account".
+    /// </summary>
+    private void OnFormChanged(Guid fromId)
+    {
+        _model.FromAccountId = fromId;
+        var from = _accounts.FirstOrDefault(x => x.Id == fromId);
+        _toAccounts = from != null
+            ? _accounts.Where(a => a.Id != from.Id).ToList()
+            : _accounts.ToList();
+        _model.ToAccountId = Guid.Empty;
+    }
+
+    /// <summary>
+    /// Navigates back to the home page.
+    /// </summary>
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/");
     }
 }

@@ -3,5 +3,5 @@
 public enum AccountType
 {
     Savings,
-    Deposit
+    DepositAccount
 }

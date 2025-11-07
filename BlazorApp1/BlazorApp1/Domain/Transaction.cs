@@ -1,21 +1,17 @@
-﻿namespace BlazorApp1.Domain
+﻿using System.Text.Json.Serialization;
+
+namespace BlazorApp1.Domain
 {
     public class Transaction
     {
-        public Guid AccountId { get; } = Guid.NewGuid();
+        // Constants
+        public Guid Id { get; } = Guid.NewGuid();
         public TransactionType TransactionType { get; set; }
         public decimal Amount { get; set; }
-        public DateTime Date { get; set; }
-        public string Description { get; set; }
+        public DateTime Date { get; set; } = DateTime.Now;
         public decimal BalanceAfterTransaction { get; set; }
-        public Guid? TransferReciver { get; set; }
-        public Transaction(Guid accountId, TransactionType transactionType, decimal amount, DateTime date, string description)
-        {
-            AccountId = accountId;
-            TransactionType = transactionType;
-            Amount = amount;
-            Date = date;
-            Description = description;
-        }
+        public Guid? ToAccount { get; set; }
+        public Guid? FromAccount { get; set; }
+        public CategoriesType? Category { get; set; }
     }
 }
