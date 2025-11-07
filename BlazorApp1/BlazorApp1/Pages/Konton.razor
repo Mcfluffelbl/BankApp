@@ -5,43 +5,12 @@
 @using System.ComponentModel.DataAnnotations
 @inject IAccountService AccountService
 
-<h1>Create a Account</h1>
 
-<style>
-    @* Custom Button *@
-.my-custom-btn {
-    background-color: seagreen; 
-    color: aliceblue;
-    border: none;
-    transition: background-color 0.3s ease, transform 0.1s ease;
-}
-.my-custom-btn:hover {
-    background-color: darkolivegreen; 
-    transform: scale(1.03);
-}
-.my-custom-btn:active {
-    background-color: grey;
-    transform: scale(0.98);
-}
-.my-custom-btn:disabled {
-    background-color: lightgray;
-    color: darkgray;
-    cursor: not-allowed;
-}
-th {                     
-    cursor: pointer;
-    background-color: #f8f9fa;
-    user-select: none;
-}
-th:hover {            
-    background-color: #e9ecef;
-}
-</style>
 
 <EditForm Model="_model" OnValidSubmit="CreateAccountAsync" OnInvalidSubmit="HandleInvalidSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
-
+    <h1>Create a Account</h1>
     <div class="form-row">
         <label>Account Name</label><br />
         <InputText @bind-Value="_model.Name" />
@@ -71,12 +40,11 @@ th:hover {
 		<ValidationMessage For="@(() => _model.InitialBalance)" />
     </div>
 
-    <button type="submit" class="btn my-custom-btn disabled="@(!_isValid)">Create Account</button>   
+    <hr />
+    <button type="submit" class="btn my-custom-btn disabled="@(!_isValid)">Create Account</button>
+	<hr />
+    <h4>Skapade konton:</h4>
 </EditForm>
-
-<hr />
-
-<h4>Skapade konton:</h4>
 
 @if (!string.IsNullOrEmpty(_errorMessage))
 {
