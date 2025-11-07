@@ -158,6 +158,16 @@ namespace BlazorApp1.Domain
             var interest = Balance * (InterestRate / 100);
             Balance += interest;
             LastUpdated = DateTime.Now;
+
+            Transactions.Add(new Transaction
+            {
+                Amount = interest,
+                TransactionType = TransactionType.Interest,
+                Date = DateTime.Now,
+                FromAccount = Id,
+                BalanceAfterTransaction = Balance
+            });
+            Console.WriteLine($"Applied interest {interest} to {Id}");
         }
     }
 }

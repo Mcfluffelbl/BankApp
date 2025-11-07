@@ -149,10 +149,9 @@
             var account = _accounts.FirstOrDefault(a => a.Id == accountId);
             if (account != null && account.AccountType == AccountType.Savings)
             {
-                decimal interestRate = 0.03m;
-                account.Balance += account.Balance * interestRate;
-                account.LastUpdated = DateTime.Now;
+                account.ApplyYearlyInterest();
                 await SaveAsync();
+                Console.WriteLine($"Applied interest to account {account.Name}");
             }
         }
     }

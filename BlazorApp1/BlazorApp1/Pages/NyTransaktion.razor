@@ -31,7 +31,9 @@ else
             <InputSelect @bind-Value="_model.TransactionType" class="form-select">
                 @foreach (var type in Enum.GetValues(typeof(TransactionType))
                             .Cast<TransactionType>()
-                            .Where(t => t != TransactionType.Transferin && t != TransactionType.Transferout))
+                            .Where(t => t != TransactionType.Transferin
+                            && t != TransactionType.Transferout
+                            && t != TransactionType.Interest))
                 {
                     <option value="@type">@type</option>
                 }
