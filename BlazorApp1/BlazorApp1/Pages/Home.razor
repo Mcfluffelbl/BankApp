@@ -5,6 +5,7 @@
 
 @if (!isLoggedIn)
 {
+    @* Login popup displayed when user is not authenticated *@
     <div class="popup-backdrop">
         <div class="popup">
             <h2>Login Required</h2>
@@ -20,6 +21,7 @@
 }
 else
 {
+    @* Main page content displayed after successful login *@
     <div class="hero">
         <h1>Voltra Bank</h1>
         <h4>Empowering your financial future — manage your economy with confidence.</h4>
@@ -31,18 +33,21 @@ else
 
     <div class="content">
 
+        @* Investment information section *@
         <div class="card">
             <img src="images/aktiefonder-768x434.jpg" alt="Voltra Bank Logo" />
             <h2>Invest Smart</h2>
             <h4>Discover our beginner-friendly stock guide and grow your wealth today.</h4>
         </div>
 
+        @* Market update section *@
         <div class="card">
             <img src="images/iStock-501199714.jpg" alt="Voltra Bank Logo" />
             <h2>Market News</h2>
             <h4>Stay updated — Pineapple Pizza stocks are on the rise! 🍍📈</h4>
         </div>
 
+        @* Security awareness section with external link *@
         <div class="card">
             <img src="https://media.giphy.com/media/3o6Zt481isNVuQI1l6/giphy.gif" alt="Dancing Money" />
             <h2>Security Alert</h2>
@@ -56,16 +61,18 @@ else
     </div>
 }
 @code {
+    // Fields
     private bool isLoggedIn = false;
     private string userCode = "";
     private bool showError = false;
 
     /// <summary>
-	/// Adds login functionality
+	/// Handles login validation.
+    /// Verifies whether the entered user code matches the correct access code.
     /// </summary>
     private void CheckLogin()
     {
-		// Control if the userCode is correct
+        // Check if the entered user code is correct
 		if (userCode == "1234") // Switch to your desired code
         {
             isLoggedIn = true;
