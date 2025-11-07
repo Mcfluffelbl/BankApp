@@ -2,6 +2,9 @@
 
 namespace BlazorApp1.Domain
 {
+    /// <summary>
+    /// Represents a bank account with basic financial operations such as deposit, withdrawal, transfer, and interest calculation.
+    /// </summary>
     public class BankAccount : IBankAccount
     {
         // Constants
@@ -12,8 +15,6 @@ namespace BlazorApp1.Domain
         public decimal Balance { get; set; }
         public DateTime LastUpdated { get; set; }
         public List<Transaction> Transactions { get; private set; } = new();
-
-        //Ny:
         public decimal InterestRate { get; set; } = 3m;
 
         // Constructor
@@ -38,10 +39,10 @@ namespace BlazorApp1.Domain
         }
 
         /// <summary>
-        /// Deposit a specifik amount to the account balance
+        /// Deposit a specifik amount to the account balance.
         /// </summary>
-        /// <param name="amount"> The specific amount </param>
-        /// <exception cref="ArgumentException"> An exception if amount is or less than 0 </exception>
+        /// <param name="amount"> The amount to deposit </param>
+        /// <exception cref="ArgumentException"> Thrown when the amount is zero or negative </exception>
         public void Deposit(decimal amount)
         {
             if (amount <= 0)
@@ -66,11 +67,12 @@ namespace BlazorApp1.Domain
         }
 
         /// <summary>
-        /// Withdraw a specifik amount from the account balance
+        /// Withdraws a specified amount from the account.
         /// </summary>
-        /// <param name="amount">The specific amount</param>
-        /// <exception cref="ArgumentException"> An exception if amount is or less than 0 </exception>
-        /// <exception cref="InvalidOperationException">An exception if amount is incorrect</exception>
+        /// <param name="amount">The amount to withdraw.</param>
+        /// <param name="category">Optional category for the transaction.</param>
+        /// <exception cref="ArgumentException">Thrown when the amount is zero or negative.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when the balance is insufficient.</exception>
         public void Withdraw(decimal amount, CategoriesType? category = null)
         {
             if (amount <= 0)
@@ -84,11 +86,11 @@ namespace BlazorApp1.Domain
                 throw new InvalidOperationException("Insufficient amount");
             }
             
-            // Withdraw from account
+            // Withdraw from account.
             Balance -= amount;
             LastUpdated = DateTime.Now;
 
-            // Add transaction with category
+            // Record transaction with category.
             Transactions.Add(new Transaction
             {
                 Amount = -amount,
@@ -102,22 +104,22 @@ namespace BlazorApp1.Domain
         }
 
         /// <summary>
-        /// Transfer a specific amount from an account to an account
+        /// Transfer a specific amount from this account to another.
         /// </summary>
-        /// <param name="to"> The account to recive </param>
-        /// <param name="amount"> The specific amount</param>
-        /// <exception cref="ArgumentException"> An exception if amount is or less than 0 </exception>
-        /// <exception cref="InvalidOperationException"> If amount is less than balance trhow Exception </exception>
+        /// <param name="to"> The recipient account </param>
+        /// <param name="amount"> The amount to transfer </param>
+        /// <exception cref="ArgumentException"> Thrown when the amount is zero or negative </exception>
+        /// <exception cref="InvalidOperationException"> Thrown when the balance is insufficient </exception>
         public void Transfer(BankAccount to, decimal amount)
         {
-            // Amount given is or less than 0 give exception
+            // Amount given is or less than 0 give exception.
             if (amount <= 0)
             {
                 Console.WriteLine("The amount needs to be bigger than 0 to transfer");
                 throw new ArgumentException("The amount transferred needs to be bigger than 0");
             }
             
-            // If balance is less than the amount throw exception
+            // If balance is less than the amount throw exception.
             if (Balance < amount)
             {
                 Console.WriteLine("Insufficient amount to transfer, it needs to be less than current balance");
@@ -152,7 +154,9 @@ namespace BlazorApp1.Domain
             Console.WriteLine($"Transfer {amount} from {Id} to {to.Id}");
         }
 
-        //NY:
+        /// <summary>
+        /// Applies annual interest to the account balance based on the current interest rate.
+        /// </summary>
         public void ApplyYearlyInterest()
         {
             var interest = Balance * (InterestRate / 100);

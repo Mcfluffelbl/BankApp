@@ -1,7 +1,7 @@
 ﻿namespace BlazorApp1.Interface
 {
     /// <summary>
-    /// Interface containing the BankAccount methods
+    /// Interface containing the BankAccount methods.
     /// </summary>
     public interface IBankAccount
     {
