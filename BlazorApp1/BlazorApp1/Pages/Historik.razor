@@ -1,14 +1,287 @@
-﻿@page "/Historik"
+﻿@page "/History"
+@using BlazorApp1.Services
+@using BlazorApp1.Domain
+@using BlazorApp1.Interface
+@inject IAccountService AccountService
 
-<body 
-	
-	<PageTitle>History</PageTitle>
+<h1>History</h1>
 
-	<h1>History</h1>
+@if (_accounts.Count == 0)
+{
+    @* If no accounts error message *@
+    Console.WriteLine("There is no accounts yet made, to show in history");
+    <p>No accounts yet</p>
+}
+else
+{
+    @* If Accounts Show a dropp down list of all accounts *@
+    <div class="mb-2">
+        <InputSelect TValue="Guid"
+            class="form-select"
+            id="accountSelect"
+            @bind-Value="SelectedAccountId">
+            @foreach (var account in _accounts)
+            {
+                <option value="@account.Id">@account.Name - Saldo: @account.Balance @account.Currency</option>
+            }
+        </InputSelect>
+    </div>
 
-	<h5>Transaction History will be displayed here.</h5>
-</body>
+    @* Sort button *@
+    <div class="mb-2">
+        <button class="btn btn-sm" @onclick="() => SetSort(SortKey.Date)">
+            SortBy: Date @(currentKey == SortKey.Date ? (descending ? "▲" : "▼") : "-")
+        </button>
+        <button class="btn btn-sm" @onclick="() => SetSort(SortKey.Amount)">
+            SortBy: Amount @(currentKey == SortKey.Amount ? (descending ? "▲" : "▼") : "-")
+        </button>
+    </div>
+    <br />
+    @* Filter options *@
+    <div class="mb-2">
+        <label for="typeFilter">Filter by Type:</label>
+        <InputSelect TValue="TransactionType?" class="form-select" id="typeFilter" @bind-Value="selectedTransactionType">
+            <option value="">All</option>
+            @foreach (TransactionType type in Enum.GetValues(typeof(TransactionType))
+                    .Cast<TransactionType>()
+                    .Where(t => t != TransactionType.Transfer))
+            {
+                <option value="@type">@type</option>
+            }
+        </InputSelect>
+    </div>
+
+    @* Date intervals-filter *@
+    <div class="mb-2 d-flex gap-3">
+        <div>
+            <label for="fromDate">From date:</label>
+            <InputDate TValue="DateTime?" class="form-control" id="fromDate" @bind-Value="fromDate" />
+        </div>
+        <div>
+            <label for="toDate">To date:</label>
+            <InputDate TValue="DateTime?" class="form-control" id="toDate" @bind-Value="toDate" />
+        </div>
+    </div>
+
+    <div class="mb-2">
+        <button class="btn btn-sm btn-primary" @onclick="ApplyFilters">Apply Filter</button>
+        <button class="btn btn-sm btn-secondary" @onclick="ClearFilter">Clear Filter</button>
+    </div>
+
+    @if (!sortedTransaction().Any())
+    {
+        @* If no transaktions error message *@
+        Console.WriteLine("There is no transactions yet");
+        <p>No Transactions for the selected filter</p>
+    }
+    else
+    {
+        @* Display filtered and sorted transactions *@
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Transaktiontype</th>
+                    <th>Category</th>
+                    <th>Amount after</th>
+                    <th>From -> to</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var transaction in filteredTransactions.Any() ? filteredTransactions : sortedTransaction())
+                {
+                    <tr>
+                        <td>@transaction.Date.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>@transaction.Amount</td>
+                        <td>@GetTransactionTypeText(transaction.TransactionType)</td>
+                        <td>
+                            @if (transaction.TransactionType == TransactionType.Withdrawal && transaction.Category != null)
+                            {
+                                @transaction.Category.ToString()
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
+                        </td>
+                        <td>@transaction.BalanceAfterTransaction</td>
+                        <td>
+                            @if (transaction.FromAccount.HasValue || transaction.ToAccount.HasValue)
+                            {
+                                <span>@(transaction.FromAccount.ToString()[..4]) ->  @((transaction.ToAccount?.ToString()[..4]) ?? "" )</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
 
 @code {
+    // Fields
+    private List<BankAccount> _accounts;
+    private List<Transaction> _transactions = new ();
+    private BankAccount? _selectedAccount;
+    private Guid _selectedAccountId;
+    private DateTime? fromDate;
+    private DateTime? toDate;
+    private TransactionType? selectedTransactionType;
 
+    // Sorting state
+    private SortKey currentKey = SortKey.Date;
+    private bool descending = true;
+    private IEnumerable<Transaction> filteredTransactions = new List<Transaction>();
+
+    // Enums
+    private enum SortKey
+    {
+        Date,
+        Amount
+    }
+
+    // Enums
+    private enum FilterKey
+    {
+        DateFilter,
+        TypeFilter
+    }
+
+    /// <summary>
+    /// Updates the current sorting key and direction.
+    /// </summary>
+    private void SetSort(SortKey sortkey)
+    {
+        if(currentKey == sortkey)
+        {
+            descending = !descending;
+        }
+        else
+        {
+            currentKey = sortkey;
+            descending = true;
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the selected account ID and updates the selected account reference.
+    /// </summary>
+    private Guid SelectedAccountId
+    {
+        get => _selectedAccountId;
+        set
+        {
+            if (_selectedAccountId == value)
+                return;
+            _selectedAccountId = value;
+            _selectedAccount = _accounts.FirstOrDefault(account => account.Id == value);
+            StateHasChanged();
+        }
+    }
+
+    /// <summary>
+    /// Loads available accounts on component initialization.
+    /// </summary>
+    protected override async Task OnInitializedAsync()
+    {
+        var accounts = await AccountService.GetAccounts();
+        _accounts = accounts.Cast<BankAccount>().ToList();
+        _transactions = new();
+
+        if (_accounts.Count > 0)
+        {
+            _selectedAccountId = _accounts[0].Id;
+            _selectedAccount = _accounts[0];
+        }
+    }
+
+    /// <summary>
+    /// Returns the current list of transactions after applying sorting and optional filtering.
+    /// </summary>
+    private IEnumerable<Transaction> sortedTransaction()
+    {
+        if (_selectedAccount == null)
+        {
+            return Enumerable.Empty<Transaction>();
+        }
+        var list = filteredTransactions.Any() || selectedTransactionType.HasValue || fromDate.HasValue || toDate.HasValue
+        ? filteredTransactions
+        : _selectedAccount.Transactions.AsEnumerable();
+
+        // Filter
+        if (filteredTransactions.Any())
+        {
+            list = filteredTransactions;
+        }
+
+        // Sort
+        list = currentKey switch
+        {
+            SortKey.Amount => descending ? list.OrderByDescending(t => t.Amount) : list.OrderBy(t => t.Amount),
+            SortKey.Date => descending ? list.OrderByDescending(t => t.Date) : list.OrderBy(t => t.Date),
+            _ => list
+        };
+        return list;
+    }
+
+    /// <summary>
+    /// Returns a user-friendly name for each transaction type.
+    /// </summary>
+    /// <param name="type">Enum type</param>
+    private string GetTransactionTypeText(TransactionType type) => type switch
+    {
+        TransactionType.Deposit => "Deposit",
+        TransactionType.Withdrawal => "Withdraw",
+        TransactionType.Transferout => "Transfer Out",
+        TransactionType.Transferin => "Transfer In",
+        TransactionType.Interest => "Interest Update",
+        _ => type.ToString()
+    };
+
+    /// <summary>
+    /// Applies all selected filters (type and date range).
+    /// </summary>
+    private void ApplyFilters()
+    {
+        if (_selectedAccount == null)
+        {
+            return;
+        }
+
+        var transactions = _selectedAccount.Transactions.AsEnumerable();
+
+        // Filter by start date
+        if (fromDate.HasValue)
+        {
+            transactions = transactions.Where(t => t.Date >= fromDate.Value);
+        }
+
+        // Filter by end date (include entire day)
+        if (toDate.HasValue)
+        {
+            transactions = transactions.Where(t => t.Date <= toDate.Value.AddDays(1).AddTicks(-1));
+        }
+
+        // Filter by transaction type
+        if (selectedTransactionType.HasValue)
+        {
+            transactions = transactions.Where(t => t.TransactionType == selectedTransactionType.Value);
+        }
+
+        filteredTransactions = transactions.ToList();
+        Console.WriteLine($"Applied chosen filter for {selectedTransactionType}");
+    }
+
+    /// <summary>
+    /// Clears all active filters.
+    /// </summary>
+    private void ClearFilter()
+    {
+        selectedTransactionType = null;
+        fromDate = null;
+        toDate = null;
+        filteredTransactions = new List<Transaction>();
+        Console.WriteLine("Filters cleared");
+    }
 }

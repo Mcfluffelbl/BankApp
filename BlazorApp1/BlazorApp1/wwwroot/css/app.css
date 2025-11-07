@@ -64,7 +64,6 @@ a, .btn-link {
     width: 100%;
     z-index: 1000;
 }
-
     #blazor-error-ui .dismiss {
         cursor: pointer;
         position: absolute;
@@ -77,7 +76,6 @@ a, .btn-link {
     padding: 1rem 1rem 1rem 3.7rem;
     color: white;
 }
-
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
@@ -89,7 +87,6 @@ a, .btn-link {
     height: 8rem;
     margin: 20vh auto 1rem auto;
 }
-
     .loading-progress circle {
         fill: none;
         stroke: #e0e0e0;
@@ -97,7 +94,6 @@ a, .btn-link {
         transform-origin: 50% 50%;
         transform: rotate(-90deg);
     }
-
         .loading-progress circle:last-child {
             stroke: #1b6ec2;
             stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
@@ -110,11 +106,323 @@ a, .btn-link {
     font-weight: bold;
     inset: calc(20vh + 3.25rem) 0 auto 0.2rem;
 }
-
     .loading-progress-text:after {
         content: var(--blazor-load-percentage-text, "Loading");
     }
 
 code {
     color: #c02d76;
+}
+
+/* --- Popup login styles --- */
+.popup-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+.popup {
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    text-align: center;
+    width: 300px;
+}
+.popup input {
+    width: 80%;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+/* --- Page layout and hero section --- */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f7fa;
+    margin: 0;
+    color: #333;
+}
+
+/* Hero section */
+.hero {
+    background: linear-gradient(135deg, #004d40, #00796b);
+    color: white;
+    text-align: center;
+    padding: 80px 20px;
+    border-radius: 0 0 50px 50px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+}
+    .hero h1 {
+        font-size: 3rem;
+        margin-bottom: 10px;
+    }
+    .hero h4 {
+        font-weight: 400;
+        max-width: 600px;
+        margin: 0 auto;
+        opacity: 0.9;
+    }
+    .hero svg {
+        margin-top: 20px;
+        color: #e0f2f1;
+    }
+
+/* Content section */
+.content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    margin: 60px auto;
+    max-width: 1000px;
+    text-align: center;
+}
+
+/* Cards */
+.card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 20px;
+    width: 280px;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+}
+.card img {
+    border-radius: 12px;
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    margin-bottom: 15px;
+}
+.card h2 {
+    color: #004d40;
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+}
+.card h4 {
+    font-weight: 400;
+    font-size: 0.95rem;
+    color: #555;
+}
+
+/* Buttons */
+.my-custom-btn3 {
+    background-color: #00796b;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    margin-top: 10px;
+}
+.my-custom-btn3:hover {
+    background-color: #004d40;
+    transform: scale(1.05);
+}
+.my-custom-btn3:active {
+    background-color: #555;
+    transform: scale(0.97);
+}
+
+/* --- Konton-sidan --- */
+
+/* Custom button */
+.my-custom-btn {
+    background-color: seagreen;
+    color: aliceblue;
+    border: none;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+.my-custom-btn:hover {
+    background-color: darkolivegreen;
+    transform: scale(1.03);
+}
+.my-custom-btn:active {
+    background-color: grey;
+    transform: scale(0.98);
+}
+.my-custom-btn:disabled {
+    background-color: lightgray;
+    color: darkgray;
+    cursor: not-allowed;
+}
+
+/* Sorterbara tabellhuvuden */
+th {
+    cursor: pointer;
+    background-color: #f8f9fa;
+    user-select: none;
+    transition: background-color 0.2s ease;
+}
+th:hover {
+    background-color: #e9ecef;
+}
+
+/* === NewTransaktion Page Styles === */
+
+/* --- Back Button --- */
+.back-btn {
+    background-color: transparent;
+    border: none;
+    color: #0b5c5a;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    padding: 5px 10px;
+}
+.back-btn:hover {
+        color: #063f3e;
+}
+
+/* --- Amount Box --- */
+.amount-card {
+    background-color: #0b5c5a;
+    color: white;
+    border-radius: 10px;
+    padding: 30px;
+    text-align: center;
+    width: 300px;
+    margin: 20px auto;
+}
+.amount-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+.amount-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    opacity: 0.9;
+}
+.amount-input-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+}
+.amount-input {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-align: right;
+    width: 200px;
+    outline: none;
+}
+.amount-input:focus {
+    outline: none;
+}
+.amount-currency {
+    font-size: 2.5rem;
+    margin-left: 5px;
+}
+
+/* --- Account Box --- */
+.account-card {
+    background-color: #0b5c5a;
+    color: white;
+    border-radius: 10px;
+    padding: 25px;
+    margin: 20px auto;
+    text-align: center;
+    width: 300px;
+}
+.account-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+.account-subtitle {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin-bottom: 15px;
+}
+.account-select {
+    background-color: white;
+    color: #0b5c5a;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 1rem;
+    width: 100%;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.account-select:hover {
+    background-color: #e0f2f1;
+}
+.account-select:disabled {
+    background-color: #d9d9d9;
+    color: #777;
+    cursor: not-allowed;
+}
+
+/* --- Custom Submit Button --- */
+.my-custom-btn {
+    background-color: #AC8BE8;
+    color: aliceblue;
+    border: none;
+    transform: scale(1);
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+.my-custom-btn:hover {
+    background-color: #0b5c5f;
+    transform: scale(2.3);
+}
+.my-custom-btn:active {
+    background-color: darkslategray;
+    transform: scale(1.9);
+}
+.my-custom-btn:disabled {
+    background-color: lightgray;
+    color: darkgray;
+    cursor: not-allowed;
+}
+
+/* --- Custom Submit Button 2 --- */
+.my-custom-btn2 {
+    background-color: #AC8BE8;
+    color: aliceblue;
+    border: none;
+    transform: scale(2);
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+    .my-custom-btn2:hover {
+        background-color: #0b5c5f;
+        transform: scale(2.3);
+    }
+    .my-custom-btn2:active {
+        background-color: darkslategray;
+        transform: scale(1.9);
+    }
+    .my-custom-btn2:disabled {
+        background-color: lightgray;
+        color: darkgray;
+        cursor: not-allowed;
+    }
+
+/* --- Sortable Table Headers --- */
+th {
+    cursor: pointer;
+    background-color: #f8f9fa;
+    user-select: none;
+}
+th:hover {
+    background-color: #e9ecef;
 }

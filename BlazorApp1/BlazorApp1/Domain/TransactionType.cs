@@ -4,6 +4,9 @@
     {
         Deposit,
         Withdrawal,
-        Transfer
+        Transferin,
+        Transferout,
+        Transfer,
+        Interest
     }
 }

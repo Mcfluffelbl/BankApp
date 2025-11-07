@@ -1,10 +1,13 @@
 ﻿namespace BlazorApp1.Interface
 {
+    /// <summary>
+    /// Interface contaning the save methods.
+    /// </summary>
     public interface IStorageService
     {
-        //spara
+        // Save
         Task SetItemAsync<T>(string key, T value);
-        //hämta
+        // Get
         Task<T> GetItemAsync <T>(string key);
     }
 }

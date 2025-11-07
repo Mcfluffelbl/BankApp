@@ -24,7 +24,10 @@ namespace BlazorApp1.Services
         {
             var json = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", key);
             if (string.IsNullOrEmpty(json))
+            {
+                Console.WriteLine("Couldent get item from local storage");
                 return default;
+            }
             return JsonSerializer.Deserialize<T>(json, _jsonSerializerOptions)!;
         }
     }
