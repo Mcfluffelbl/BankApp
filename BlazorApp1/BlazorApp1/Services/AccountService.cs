@@ -190,5 +190,39 @@
                 Console.WriteLine($"Applied interest to account {account.Name}");
             }
         }
+
+        public async Task<IReadOnlyList<BankAccount>> GetAccountsAsync()
+        {
+            await IsInitialized();
+            return _accounts.AsReadOnly();
+        }
+
+        public async Task DepositAsync(Guid accountId, decimal amount, string? note = null)
+        {
+            await IsInitialized();
+            var account = _accounts.FirstOrDefault(a => a.Id == accountId)
+            ??throw new InvalidOperationException("Account not found.");
+            account.Deposit(amount, note);
+            await SaveAsync();
+
+        }
+
+        public async Task WithdrawAsync(Guid accountId, decimal amount, string? note = null)
+        {
+            await IsInitialized();
+            var account = _accounts.FirstOrDefault(a => a.Id == accountId)
+            ?? throw new InvalidOperationException("Account not found.");
+            account.WithDraw(amount, note);
+            await SaveAsync();
+        }
+
+        public async Task<IReadOnlyList<Transaction>> GetTransactionsAsync(Guid accountId)
+        {
+            await IsInitialized();
+            var account = _accounts.FirstOrDefault(a => a.Id == accountId)
+            ?? throw new InvalidOperationException("Account not found.");
+
+            return account.transactions.AsReadOnly();
+        }
     }
 }

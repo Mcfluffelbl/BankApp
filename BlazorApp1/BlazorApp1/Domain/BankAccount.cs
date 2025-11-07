@@ -18,8 +18,14 @@ namespace BlazorApp1.Domain
         public List<Transaction> Transactions { get; private set; } = new();
         public decimal InterestRate { get; set; } = 3m;
 
+<<<<<<< HEAD
+        private readonly List<Transaction> _transactions = new();
+
+        public BankAccount(string name, AccountType accountType, string currency, decimal balance)
+=======
         // Constructor
         public BankAccount(string name, AccountType accountType, string currency, decimal initialBalance)
+>>>>>>> Workplace1.2
         {
             Name = name;
             AccountType = accountType;
@@ -39,6 +45,27 @@ namespace BlazorApp1.Domain
             Transactions = transactions ?? new List<Transaction>(); 
         }
 
+<<<<<<< HEAD
+        public void WithDraw(decimal amount, string? note = null)
+        {
+            if (amount <= 0)
+            {
+                if(amount <= 0) throw new ArgumentException("Withdrawal amount must be positive.", nameof(amount));
+                if(amount > Balance) throw new InvalidOperationException("Insufficient funds for this withdrawal.");
+                Balance -= amount;
+                Transaction.Add(new Transaction(Guid.NewGuid(), Id, DateTime.UtcNow, TransactionType.Withdrawal, amount, note));
+            }
+        }
+        public void Deposit(decimal amount, string? note = null)
+        {
+            if(amount <= 0)
+            {
+                throw new ArgumentException("Deposit amount must be positive.", nameof(amount));
+                Balance += amount;
+                Transaction.Add(new Transaction(Guid.NewGuid(), Id, DateTime.UtcNow, TransactionType.Deposit, amount, note));
+            }
+        }  
+=======
         /// <summary>
         /// Deposit a specifik amount to the account balance.
         /// </summary>
@@ -174,5 +201,6 @@ namespace BlazorApp1.Domain
             });
             Console.WriteLine($"Applied interest {interest} to {Id}");
         }
+>>>>>>> Workplace1.2
     }
 }
