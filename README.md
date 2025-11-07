@@ -1,5 +1,5 @@
 # BankApp
-A bankapp meant to keep check of youre finanances.
+A simple application to help you keep track of your finances.
 
 ## Features
 - [Overveiw](#overview)
@@ -10,9 +10,11 @@ A bankapp meant to keep check of youre finanances.
 - [Configuration](#configuration)
 - [Project Structure](#project-structure)
 - [License](#license)
+- [Screenshots](#screenshots)
 
 ## Overview
-BankApp is a simple application designed to help users manage their finances effectively. It provides features such as account management, transaction tracking, and financial reporting.
+BankApp is a lightweight application designed to help users manage their finances effectively.
+It allows users to create and manage accounts, track transactions, monitor withdrawals, add intrest yearly, and view financial summaries — all stored locally.
 
 ## Features
 - Account Management: Create, update, and delete bank accounts.
@@ -25,10 +27,10 @@ BankApp is a simple application designed to help users manage their finances eff
 - Real-time updates: Keeps track of dates and times of transactions and accounts.
 
 ## Getting Started
-To get started with BankApp, follow these steps:
+Follow these steps to get started with BankApp.
 
 ### Prerequisites
-
+A modern web browser (Chrome, Edge, Firefox, etc.)
 
 ### Installation
 1. Clone the repository:
@@ -64,6 +66,7 @@ BankApp does not require any additional configuration. All data is stored locall
 
 ## License
 This project is not licensed.
+You may modify or use it at your own discretion.
 
 ## Screenshots
-![Login Page](screenshots/login.png) //Ändra till screenshot path
+Screenshots are available in the wwwroot/images folder, named sequentially as ReadMe-Picture-Name-1, ReadMe-Picture-Name-2, etc.
