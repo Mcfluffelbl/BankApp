@@ -66,11 +66,26 @@
         public async Task<BankAccount> CreateAccount(string name, AccountType accountType, string currency, decimal initialBalance) //Liknande transaktion?
         {
             await IsInitialized();
+<<<<<<< HEAD
+            var account = new BankAccount(Guid.NewGuid(), name, accountType, currency, initialBalance);
+=======
             var account = new BankAccount(name, accountType, currency, initialBalance);
+>>>>>>> Stashed changes
+=======
+            var account = new BankAccount(name, accountType, currency, initialBalance);
+>>>>>>> Workplace1.2
             _accounts.Add(account);
             return account;
         }
+<<<<<<< HEAD
+        public async Task<List<IBankAccount>> GetAccounts()
+=======
 
+        /// <summary>
+        /// Retrieves all bank accounts from memory or storage.
+        /// </summary>
+        /// <returns> A list of BankAccount objects </returns>
+>>>>>>> Workplace1.2
         public async Task<List<BankAccount>> GetAccounts()
         {
 <<<<<<< Updated upstream
@@ -103,6 +118,7 @@
             _accounts.Clear();
             _accounts.AddRange(updatedAccounts.Cast<BankAccount>());
             await SaveAsync();
+            }
         }
 
         /// <summary>
