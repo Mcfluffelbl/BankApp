@@ -5,42 +5,11 @@
 @using System.ComponentModel.DataAnnotations
 @inject IAccountService AccountService
 
-<h1>Create a Account</h1>
-
-<style>
-    @* Custom Button *@
-.my-custom-btn {
-    background-color: seagreen; 
-    color: aliceblue;
-    border: none;
-    transition: background-color 0.3s ease, transform 0.1s ease;
-}
-.my-custom-btn:hover {
-    background-color: darkolivegreen; 
-    transform: scale(1.03);
-}
-.my-custom-btn:active {
-    background-color: grey;
-    transform: scale(0.98);
-}
-.my-custom-btn:disabled {
-    background-color: lightgray;
-    color: darkgray;
-    cursor: not-allowed;
-}
-th {                     
-    cursor: pointer;
-    background-color: #f8f9fa;
-    user-select: none;
-}
-th:hover {            
-    background-color: #e9ecef;
-}
-</style>
-
 <EditForm Model="_model" OnValidSubmit="CreateAccountAsync" OnInvalidSubmit="HandleInvalidSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
+
+    <h1>Create a Account</h1>
 
     <div class="form-row">
         <label>Account Name</label><br />
@@ -71,12 +40,12 @@ th:hover {
 		<ValidationMessage For="@(() => _model.InitialBalance)" />
     </div>
 
-    <button type="submit" class="btn my-custom-btn disabled="@(!_isValid)">Create Account</button>   
+    <hr />
+    <button type="submit" class="btn my-custom-btn disabled="@(!_isValid)">Create Account</button>
+	<hr />
+
+    <h4>Created accounts:</h4>
 </EditForm>
-
-<hr />
-
-<h4>Skapade konton:</h4>
 
 @if (!string.IsNullOrEmpty(_errorMessage))
 {
@@ -85,7 +54,7 @@ th:hover {
 }
 @if (_accounts.Any())
 {
-    @* Sort by if any accounts *@
+    @* Display a sortable table of created accounts *@
     <table class="table table-striped table-bordered">
         <thead>
             <tr>
@@ -122,11 +91,12 @@ th:hover {
 }
 else
 {
+    @* Show message if no accounts exist *@
     Console.WriteLine("No accounts created yet to put up in the list");
     <p>No accounts created yet.</p>
 }
 @code {
-    // Constants
+    // Fields and state
     private CreateAccountModel _model = new();
     private List<BankAccount> _accounts = new();
     private string? _errorMessage;
@@ -134,6 +104,9 @@ else
     private string? _currentSortColumn;
     private bool _sortAscending = true;
 
+    /// <summary>
+    /// Loads existing accounts and sorts them initially by name.
+    /// </summary>
     protected override async Task OnInitializedAsync()
     {
         _accounts = await AccountService.GetAccounts();
@@ -141,7 +114,7 @@ else
     }
 
     /// <summary>
-    /// 
+    /// Creates a new account using the data from the form and refreshes the account list.
     /// </summary>
     /// <returns></returns>
     private async Task CreateAccountAsync()
@@ -149,26 +122,34 @@ else
         try
         {
             _errorMessage = null;
+
             await AccountService.CreateAccount(
                 _model.Name!,
                 _model.AccountType,
                 _model.Currency!,
                 _model.InitialBalance
             );
+
+            // Refresh account list after creation
             _accounts = await AccountService.GetAccounts();
-            SortBy(_currentSortColumn ?? nameof(BankAccount.Name));// sortera efter den kolumnen som användaren klickade på
-            _model = new CreateAccountModel(); // töm formulär
-            _isValid = false; // återställ valideringsstatus
+            // Re-sort based on the currently selected column
+            SortBy(_currentSortColumn ?? nameof(BankAccount.Name));
+            // Reset form and validation state
+            _model = new CreateAccountModel(); 
+            _isValid = false; 
         }
         catch (Exception ex)
         {
+            // Error handling
+            Console.WriteLine("Error creating account: " + ex.Message);
             _errorMessage = ex.Message;
         }
         StateHasChanged();
     }
 
     /// <summary>
-    /// Sort by the collums
+    /// Sorts the accounts table by the specified column.
+    /// Clicking the same column toggles between ascending and descending order.
     /// </summary>
     /// <param name="columnName"> Toggle ascending/descending </param>
     private void SortBy(string? columnName) 
@@ -217,10 +198,9 @@ else
     }
 
     /// <summary>
-    /// 
+    /// Returns a visual indicator (▲ or ▼) for the current sort direction of the given column.
     /// </summary>
-    /// <param name="columnName"></param>
-    /// <returns></returns>
+    /// <param name="columnName">The column name to check.</param>
     private string GetSortIndicator(string columnName)
     {
         if (_currentSortColumn != columnName)
@@ -231,13 +211,17 @@ else
     }
 
     /// <summary>
-    /// 
+    /// Handles invalid form submissions and displays an error message.
     /// </summary>
     private void HandleInvalidSubmit()
     {
         _errorMessage = "Please correct the errors and try again.";
         _isValid = false;
     }
+
+    /// <summary>
+    /// Revalidates the form whenever a field value changes.
+    /// </summary>
     private void OnFieldChanged()
     {
         var context = new ValidationContext(_model);
@@ -246,7 +230,8 @@ else
     }
 
     /// <summary>
-    /// 
+    /// Data model for creating a new bank account.
+    /// Includes validation attributes for form input.
     /// </summary>
     public class CreateAccountModel
     {

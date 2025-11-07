@@ -6,6 +6,7 @@
         Withdrawal,
         Transferin,
         Transferout,
-        Transfer
+        Transfer,
+        Interest
     }
 }

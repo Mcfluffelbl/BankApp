@@ -10,142 +10,13 @@
     </button>
 </div>
 
-<h1 style="text-align: center;">New Transaction</h1>
-
-<hr />
-
-<style>
-    @* Custom back button *@
-    back-btn {
-        background-color: transparent;
-        border: none;
-        color: #0b5c5a;
-        font-size: 1.2rem;
-        cursor: pointer;
-        transition: color 0.2s ease;
-    }
-    .back-btn:hover {
-        color: ;
-    }
-
-    @* Custom Box for amount *@
-    .amount-card {
-        background-color: #0b5c5a;
-        color: white;
-        border-radius: 10px;
-        padding: 30px;
-        text-align: center;
-        width: 300px;
-        margin: 20px auto;
-    }
-    .amount-title {
-        font-weight: 600;
-        font-size: 1.1rem;
-    }
-    .amount-subtitle {
-        font-size: 0.9rem;
-        margin-bottom: 20px;
-        opacity: 0.9;
-    }
-    .amount-input-wrapper {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2rem;
-        font-weight: bold;
-    }
-    .amount-input {
-        background: transparent;
-        border: none;
-        color: white;
-        font-size: 2.5rem;
-        font-weight: bold;
-        text-align: right;
-        width: 200px;
-        outline: none;
-    }
-    .amount-input:focus {
-        outline: none;
-    }
-    .amount-currency {
-        font-size: 2.5rem;
-        margin-left: 5px;
-    }
-
-    @* Custom Box for account *@
-    .account-card {
-        background-color: #0b5c5a;
-        color: white;
-        border-radius: 10px;
-        padding: 25px;
-        margin: 20px auto;
-        text-align: center;
-        width: 300px;
-    }
-    .account-title {
-        font-weight: 600;
-        font-size: 1.1rem;
-    }
-    .account-subtitle {
-        font-size: 0.9rem;
-        opacity: 0.9;
-        margin-bottom: 15px;
-    }
-    .account-select {
-        background-color: white;
-        color: #0b5c5a;
-        border: none;
-        border-radius: 8px;
-        padding: 10px;
-        font-size: 1rem;
-        width: 100%;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    .account-select:hover {
-        background-color: #e0f2f1;
-    }
-    .account-select:disabled {
-        background-color: #d9d9d9;
-        color: #777;
-        cursor: not-allowed;
-    }
-
-    @* Custom Button *@
-    .my-custom-btn {
-        background-color: #AC8BE8;
-        color: aliceblue;
-        border: none;
-        transform: scale(2);
-        transition: background-color 0.3s ease, transform 0.1s ease;
-    }
-    .my-custom-btn:hover {
-        background-color: #0b5c5f;
-        transform: scale(2.3);
-    }
-    .my-custom-btn:active {
-        background-color: darkslategray;
-        transform: scale(1.90);
-    }
-    .my-custom-btn:disabled {
-        background-color: lightgray;
-        color: darkgray;
-        cursor: not-allowed;
-    }
-    th {
-        cursor: pointer;
-        background-color: #f8f9fa;
-        user-select: none;
-    }
-    th:hover {
-        background-color: #e9ecef;
-    }
-</style>
 @if (_accounts.Count < 1)
 {
-    @* If less than one account show errror *@
+    <h1 style="text-align: center;">New Transaction</h1>
+	<hr />
+    @* Show message if no accounts are avalible *@
     <p>You need at least one account to make a transaction.</p>
+	Console.WriteLine("No accounts available to make a transaction");
 }
 else
 {
@@ -153,20 +24,24 @@ else
         <DataAnnotationsValidator />
         <ValidationSummary />
 
-        @* Transaction Type *@
+        <h1 style="text-align: center;">New Transaction</h1>
+
+        @* Transaction type selection *@
         <div class="account-card">
             <label>Transaction Type</label>
             <InputSelect @bind-Value="_model.TransactionType" class="form-select">
                 @foreach (var type in Enum.GetValues(typeof(TransactionType))
                             .Cast<TransactionType>()
-                            .Where(t => t != TransactionType.Transferin && t != TransactionType.Transferout))
+                            .Where(t => t != TransactionType.Transferin
+                            && t != TransactionType.Transferout
+                            && t != TransactionType.Interest))
                 {
                     <option value="@type">@type</option>
                 }
             </InputSelect>
         </div>
 
-        @* Show only feilds if transfer is chosen *@
+        @* Show transfer-specific fields if the selected type is Transfer *@
         @if (_model.TransactionType == TransactionType.Transfer)
         {
             @* From acount *@ 
@@ -203,7 +78,7 @@ else
         }
         else
         {
-            @* If not transfer, show just one account option *@
+            @* For non-transfer transactions, show a single account selection *@
             <div class="account-card">
                 <label>Account</label>
                 <InputSelect TValue="Guid"
@@ -218,16 +93,22 @@ else
             </div>
         }
 
-        @* Ny: Lägg till budget/utskriftkategorier *@
-        <div class="account-card">
-            <label>Category</label>
-            <InputSelect TValue="Guid"
-                         class="form-select">
-                <option value="@Guid.Empty">-- Select an category --</option>
-            </InputSelect>
-        </div>
+        @if (_model.TransactionType == TransactionType.Withdrawal)
+        {
+            @* Show category selection only for withdrawals *@
+            <div class="account-card">
+                <label>Category</label>
+                <InputSelect @bind-Value="_model.Category" class="form-select">
+                    <option value="">-- Select a category --</option>
+                    @foreach (var category in Enum.GetValues(typeof(CategoriesType)).Cast<CategoriesType>())
+                    {
+                        <option value="@category">@category</option>
+                    }
+                </InputSelect>
+            </div>
+        }
 
-        @* Transaction amount *@
+        @* Transaction amount input *@
         <div class="amount-card">
             <div class="amount-title">Set Amount</div>
             <div class="amount-subtitle">What Amount?</div>
@@ -237,7 +118,7 @@ else
             </div>
         </div>
 
-        @* Error Message *@
+        @* Display error message if one exists *@
         @if (!string.IsNullOrEmpty(_errorMessage))
         {
             <div class="alert alert-danger">
@@ -247,40 +128,40 @@ else
 
         @* Submit Button *@
         <div style="text-align: center;">
-            <button type="submit" class="btn my-custom-btn" style="margin-top: 20px; margin-bottom: 20px;">Submit</button>
+            <button type="submit" class="btn my-custom-btn2" style="margin-top: 20px; margin-bottom: 20px;">Submit</button>
         </div>
+
+        <hr />
+
+        <h4 style="text-align: center;">Accounts</h4>
+
+        @* Display a list of all accounts *@
+        <ul>
+            @foreach (var account in _accounts)
+            {
+                <li>@account.Name: @account.Balance @account.Currency</li>
+            }
+        </ul>
     </EditForm>
-
-    <hr />
-
-    <h4 style="text-align: center;">Accounts</h4>
-
-    @* Show the whole list with accounts *@
-    <ul>
-        @* Show accounts list *@
-        @foreach (var account in _accounts)
-        {
-            <li>@account.Name: @account.Balance @account.Currency</li>
-        }
-    </ul>
 }
 @code {
-    // Constants
+    // Fields and constants
     private readonly TransferFormModel _model = new();
     private List<BankAccount> _accounts = new();
     private List<BankAccount> _toAccounts = new();
     private string? _errorMessage;
 
-    // 
+    // Form model
     private class TransferFormModel
     {
         public Guid FromAccountId { get; set; }
         public Guid ToAccountId { get; set; }
         public decimal Amount { get; set; }
         public TransactionType TransactionType { get; set; } = TransactionType.Transfer;
+        public CategoriesType? Category { get; set; }
     }
 
-    // On Start ----
+    // Lifecycle
     protected override async void OnInitialized()
     {
         _accounts = await AccountService.GetAccounts();
@@ -288,9 +169,9 @@ else
     }
 
     /// <summary>
-    /// 
+    /// Handles form submission and performs the appropriate transaction
+    /// based on the selected transaction type.
     /// </summary>
-    /// <returns></returns>
     private async Task OnSubmitAsync()
     {
         _errorMessage = null;
@@ -307,12 +188,14 @@ else
                     break;
 
                 case TransactionType.Withdrawal:
-                    AccountService.Withdraw(_model.FromAccountId, _model.Amount);
+                    AccountService.Withdraw(_model.FromAccountId, _model.Amount, _model.Category);
                     break;
             }
+            // Refresh account list and reset form fields
             _accounts = await AccountService.GetAccounts();
             _model.Amount = 0;
             _model.ToAccountId = Guid.Empty;
+            _model.Category = null;
             StateHasChanged();
         }
         catch (Exception ex)
@@ -323,9 +206,8 @@ else
     }
 
     /// <summary>
-    /// 
+    ///  Handles changes in the "From Account" dropdown.
     /// </summary>
-    /// <param name="eventArgs"></param>
     private void HandleFormChanged(ChangeEventArgs eventArgs)
     {
         if (Guid.TryParse(eventArgs.Value?.ToString(), out var id))
@@ -335,9 +217,8 @@ else
     }
 
     /// <summary>
-    /// 
+    /// Updates the "To Account" list based on the selected "From Account".
     /// </summary>
-    /// <param name="fromId"></param>
     private void OnFormChanged(Guid fromId)
     {
         _model.FromAccountId = fromId;
@@ -348,7 +229,9 @@ else
         _model.ToAccountId = Guid.Empty;
     }
 
-    // Back navigation
+    /// <summary>
+    /// Navigates back to the home page.
+    /// </summary>
     private void GoBack()
     {
         NavigationManager.NavigateTo("/");

@@ -12,5 +12,6 @@ namespace BlazorApp1.Domain
         public decimal BalanceAfterTransaction { get; set; }
         public Guid? ToAccount { get; set; }
         public Guid? FromAccount { get; set; }
+        public CategoriesType? Category { get; set; }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace BlazorApp1.Interface;
 /// <summary>
-/// Interface contaning the Accountservice methods
+/// Interface contaning the Accountservice methods.
 /// </summary>
 public interface IAccountService
 {
@@ -10,6 +10,7 @@ public interface IAccountService
     Task UpdateAccounts(List<BankAccount> updatedAccounts);
     void Transfer(Guid fromAccountId, Guid toAccountId, decimal amount);
     void Deposit(Guid toAccountId, decimal amount);
-    void Withdraw(Guid fromAccountId, decimal amount);
+    void Withdraw(Guid fromAccountId, decimal amount, CategoriesType? category);
+    Task ApplyInterest(Guid accountId);
 }
 

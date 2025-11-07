@@ -2,6 +2,9 @@
 
 namespace BlazorApp1.Domain
 {
+    /// <summary>
+    /// Represents a bank account with basic financial operations such as deposit, withdrawal, transfer, and interest calculation.
+    /// </summary>
     public class BankAccount : IBankAccount
     {
         // Constants
@@ -12,6 +15,7 @@ namespace BlazorApp1.Domain
         public decimal Balance { get; set; }
         public DateTime LastUpdated { get; set; }
         public List<Transaction> Transactions { get; private set; } = new();
+        public decimal InterestRate { get; set; } = 3m;
 
         // Constructor
         public BankAccount(string name, AccountType accountType, string currency, decimal initialBalance)
@@ -35,10 +39,10 @@ namespace BlazorApp1.Domain
         }
 
         /// <summary>
-        /// Deposit a specifik amount to the account balance
+        /// Deposit a specifik amount to the account balance.
         /// </summary>
-        /// <param name="amount"> The specific amount </param>
-        /// <exception cref="ArgumentException"> An exception if amount is or less than 0 </exception>
+        /// <param name="amount"> The amount to deposit </param>
+        /// <exception cref="ArgumentException"> Thrown when the amount is zero or negative </exception>
         public void Deposit(decimal amount)
         {
             if (amount <= 0)
@@ -63,12 +67,13 @@ namespace BlazorApp1.Domain
         }
 
         /// <summary>
-        /// Withdraw a specifik amount from the account balance
+        /// Withdraws a specified amount from the account.
         /// </summary>
-        /// <param name="amount">The specific amount</param>
-        /// <exception cref="ArgumentException"> An exception if amount is or less than 0 </exception>
-        /// <exception cref="InvalidOperationException">An exception if amount is incorrect</exception>
-        public void Withdraw(decimal amount)
+        /// <param name="amount">The amount to withdraw.</param>
+        /// <param name="category">Optional category for the transaction.</param>
+        /// <exception cref="ArgumentException">Thrown when the amount is zero or negative.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when the balance is insufficient.</exception>
+        public void Withdraw(decimal amount, CategoriesType? category = null)
         {
             if (amount <= 0)
             {
@@ -81,37 +86,40 @@ namespace BlazorApp1.Domain
                 throw new InvalidOperationException("Insufficient amount");
             }
             
-            // Withdraw from account
+            // Withdraw from account.
             Balance -= amount;
             LastUpdated = DateTime.Now;
+
+            // Record transaction with category.
             Transactions.Add(new Transaction
             {
                 Amount = -amount,
                 TransactionType = TransactionType.Withdrawal,
                 Date = DateTime.Now,
                 FromAccount = Id,
-                BalanceAfterTransaction = Balance
+                BalanceAfterTransaction = Balance,
+                Category = category
             });
             Console.WriteLine($"Withdrawn from {Id} = {amount} from {Balance}. ");
         }
 
         /// <summary>
-        /// Transfer a specific amount from an account to an account
+        /// Transfer a specific amount from this account to another.
         /// </summary>
-        /// <param name="to"> The account to recive </param>
-        /// <param name="amount"> The specific amount</param>
-        /// <exception cref="ArgumentException"> An exception if amount is or less than 0 </exception>
-        /// <exception cref="InvalidOperationException"> If amount is less than balance trhow Exception </exception>
+        /// <param name="to"> The recipient account </param>
+        /// <param name="amount"> The amount to transfer </param>
+        /// <exception cref="ArgumentException"> Thrown when the amount is zero or negative </exception>
+        /// <exception cref="InvalidOperationException"> Thrown when the balance is insufficient </exception>
         public void Transfer(BankAccount to, decimal amount)
         {
-            // Amount given is or less than 0 give exception
+            // Amount given is or less than 0 give exception.
             if (amount <= 0)
             {
                 Console.WriteLine("The amount needs to be bigger than 0 to transfer");
                 throw new ArgumentException("The amount transferred needs to be bigger than 0");
             }
             
-            // If balance is less than the amount throw exception
+            // If balance is less than the amount throw exception.
             if (Balance < amount)
             {
                 Console.WriteLine("Insufficient amount to transfer, it needs to be less than current balance");
@@ -123,8 +131,8 @@ namespace BlazorApp1.Domain
             LastUpdated = DateTime.Now;
             Transactions.Add(new Transaction
             {
-                Amount = -amount, 
-                TransactionType = TransactionType.Transferin,
+                Amount = -amount,
+                TransactionType = TransactionType.Transferout,
                 Date = DateTime.Now,
                 FromAccount = Id,
                 ToAccount = to.Id,
@@ -137,13 +145,33 @@ namespace BlazorApp1.Domain
             to.Transactions.Add(new Transaction
             {
                 Amount = amount,
-                TransactionType = TransactionType.Transferout,
+                TransactionType = TransactionType.Transferin,
                 Date = DateTime.Now,
                 FromAccount = Id,
                 ToAccount = to.Id,
                 BalanceAfterTransaction = to.Balance
             });
             Console.WriteLine($"Transfer {amount} from {Id} to {to.Id}");
+        }
+
+        /// <summary>
+        /// Applies annual interest to the account balance based on the current interest rate.
+        /// </summary>
+        public void ApplyYearlyInterest()
+        {
+            var interest = Balance * (InterestRate / 100);
+            Balance += interest;
+            LastUpdated = DateTime.Now;
+
+            Transactions.Add(new Transaction
+            {
+                Amount = interest,
+                TransactionType = TransactionType.Interest,
+                Date = DateTime.Now,
+                FromAccount = Id,
+                BalanceAfterTransaction = Balance
+            });
+            Console.WriteLine($"Applied interest {interest} to {Id}");
         }
     }
 }
